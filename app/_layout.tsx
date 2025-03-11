@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import * as SQLite from 'expo-sqlite';
 import { Platform } from 'react-native';
 import { createStore } from 'tinybase';
@@ -39,7 +38,7 @@ const App = () => {
 	return (
 		<Provider store={store}>
 			<Stack>
-				<Stack.Screen name='index' />
+				<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
 			</Stack>
 		</Provider>
 	);
