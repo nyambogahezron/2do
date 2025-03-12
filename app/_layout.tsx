@@ -1,47 +1,28 @@
-import * as SQLite from 'expo-sqlite';
-import { Platform } from 'react-native';
-import { createStore } from 'tinybase';
-import { createLocalPersister } from 'tinybase/persisters/persister-browser';
-import { createExpoSqlitePersister } from 'tinybase/persisters/persister-expo-sqlite';
-import {
-	Provider,
-	useCreatePersister,
-	useCreateStore,
-} from 'tinybase/ui-react';
+import React from 'react';
+import { Provider } from 'tinybase/ui-react';
 import { Stack } from 'expo-router';
+import { ThemeProvider } from '../context/ThemeContext';
+import { initializeStore } from '../store';
+import { Store } from 'tinybase/store';
 
-// The main app.
-const App = () => {
-	// Initialize the (memoized) TinyBase store and persist it.
-	const store = useCreateStore(createStore);
+export default function Layout() {
+	const [store, setStore] = React.useState<Store | undefined>(undefined);
 
-	const useAndStartPersister = (store: any) =>
-		// Persist store to Expo SQLite or local storage; load once, then auto-save.
-		useCreatePersister(
-			store,
-			(store) =>
-				Platform.OS === 'web'
-					? createLocalPersister(store, 'todos')
-					: createExpoSqlitePersister(
-							store,
-							SQLite.openDatabaseSync('todos.db')
-					  ),
-			[],
-			(persister) =>
-				persister.load().then(() => {
-					persister.startAutoSave();
-					return;
-				})
-		);
-	useAndStartPersister(store);
+	React.useEffect(() => {
+		(async () => {
+			const store = await initializeStore();
+			setStore(store);
+		})();
+	}, []);
 
 	return (
-		<Provider store={store}>
-			<Stack>
-				<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-			</Stack>
-		</Provider>
+		<ThemeProvider>
+			<Provider store={store}>
+				<Stack>
+					<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+					<Stack.Screen name='settings' options={{ headerShown: true }} />
+				</Stack>
+			</Provider>
+		</ThemeProvider>
 	);
-};
-
-export default App;
+}

@@ -19,6 +19,7 @@ import {
 } from 'tinybase/ui-react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from 'react-native-paper';
 
 // The TinyBase table contains the todos, with 'text' and 'done' cells.
 const TODO_TABLE = 'todo';
@@ -96,20 +97,36 @@ const ClearTodos = () => {
 
 export default function NotepadScreen() {
 	const [menuVisible, setMenuVisible] = React.useState(false);
-	const data = [];
+	const theme = useTheme();
 	return (
 		<SafeAreaProvider>
-			<StatusBar style='light' />
-			<SafeAreaView style={styles.container}>
+			<StatusBar style={theme.dark ? 'light' : 'dark'} />
+			<SafeAreaView
+				style={[
+					styles.container,
+					{
+						backgroundColor: theme.dark ? '#000' : '#fff',
+					},
+				]}
+			>
 				{/* Header */}
 				<View style={styles.header}>
-					<Text style={styles.headerText}>Todos</Text>
+					<Text
+						style={[
+							styles.headerText,
+							{
+								color: theme.colors.primary,
+							},
+						]}
+					>
+						Todos
+					</Text>
 					<View style={styles.iconContainer}>
 						<TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-							<List color={'#fff'} size={22} />
+							<List color={theme.dark ? '#fff' : '#000'} size={22} />
 						</TouchableOpacity>
 						<TouchableOpacity onPress={() => router.push('settings')}>
-							<Settings color={'#fff'} size={22} />
+							<Settings color={theme.dark ? '#fff' : '#000'} size={22} />
 						</TouchableOpacity>
 					</View>
 				</View>
@@ -171,7 +188,6 @@ export default function NotepadScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#000',
 		paddingTop: 10,
 	},
 	header: {
