@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { CircleCheckBig, List, Plus, Settings } from 'lucide-react-native';
+import { router, Stack } from 'expo-router';
+import { Plus } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
 	View,
@@ -8,9 +8,11 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	FlatList,
+	Alert,
 } from 'react-native';
 import {
 	useAddRowCallback,
+	useDelRowCallback,
 	useDelTableCallback,
 	useHasTable,
 	useRow,
@@ -19,74 +21,116 @@ import {
 } from 'tinybase/ui-react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme } from 'react-native-paper';
+import { PaperProvider, Portal, useTheme } from 'react-native-paper';
+import useGenerateId from '@/utils/generateId';
+import Menu from '@/components/ui/Menu';
+import CustomHeader from '@/components/ui/CustomHeader';
+import EmptyState from '@/components/ui/EmptyState';
+import TodoItem from '@/components/todos/TodoItem';
+import AddTodoModel from '@/components/todos/AddTodoModel';
+
+export type Todo = {
+	id: string;
+	text: string;
+	done: boolean;
+	priority: 'low' | 'medium' | 'high';
+	dueDate: string;
+	createdAt: string;
+	updatedAt: string;
+};
 
 // The TinyBase table contains the todos, with 'text' and 'done' cells.
 const TODO_TABLE = 'todo';
+const ID_CELL = 'id';
 const TEXT_CELL = 'text';
 const DONE_CELL = 'done';
-
-// Emojis to decorate each todo.
-const NOT_DONE_ICON = String.fromCodePoint(0x1f7e0);
-const DONE_ICON = String.fromCodePoint(0x2705);
+const PRIORITY_CELL = 'priority';
+const DUE_DATE_CELL = 'dueDate';
+const CREATED_AT_CELL = 'createdAt';
+const UPDATED_AT_CELL = 'updatedAt';
 
 // The text input component to add a new todo.
 const NewTodo = () => {
+	const nowDate = new Date().toISOString();
+	const itemId = useGenerateId();
 	const [text, setText] = useState('');
+	const [priority, setPriority] = useState('low');
+	const [done, setDone] = useState(false);
+	const [dueDate, setDueDate] = useState('');
+	const [createdAt, setCreatedAt] = useState(nowDate);
+	const [updatedAt, setUpdatedAt] = useState(nowDate);
+
 	const handleSubmitEditing = useAddRowCallback(
 		TODO_TABLE,
-		({ nativeEvent: { text } }: { nativeEvent: { text: string } }) => {
+		({
+			nativeEvent: { id, text, done, priority, dueDate, createdAt, updatedAt },
+		}: {
+			nativeEvent: {
+				id: string;
+				text: string;
+				done: boolean;
+				priority: string;
+				dueDate: string;
+				createdAt: string;
+				updatedAt: string;
+			};
+		}) => {
+			// if (!text.trim()) {
+			// 	return Alert.alert('Error', 'Please enter a todo');
+			// }
 			setText('');
-			return { [TEXT_CELL]: text, [DONE_CELL]: false };
+
+			return {
+				[ID_CELL]: id,
+				[TEXT_CELL]: text,
+				[DONE_CELL]: done,
+				[PRIORITY_CELL]: priority,
+				[DUE_DATE_CELL]: dueDate,
+				[CREATED_AT_CELL]: createdAt,
+				[UPDATED_AT_CELL]: updatedAt,
+			};
 		}
 	);
 	return (
-		<TextInput
-			value={text}
-			onChangeText={(text) => setText(text)}
-			onSubmitEditing={handleSubmitEditing}
-			placeholder='What do you want to do today?'
-			style={styles.input}
-		/>
+		<View>
+			<TextInput
+				value={text}
+				onChangeText={(text) => setText(text)}
+				placeholder='What do you want to do today?'
+				style={styles.input}
+			/>
+
+			<TouchableOpacity
+				style={{
+					backgroundColor: '#333',
+					padding: 10,
+					borderRadius: 5,
+					margin: 10,
+				}}
+				onPress={() =>
+					handleSubmitEditing({
+						nativeEvent: {
+							id: itemId,
+							text,
+							done,
+							priority,
+							dueDate,
+							createdAt,
+							updatedAt,
+						},
+					})
+				}
+			>
+				<Text style={{}}>Add</Text>
+			</TouchableOpacity>
+		</View>
 	);
 };
 
 // A single todo component, either 'not done' or 'done': press to toggle.
-const Todo = ({ id }: { id: any }) => {
-	const { text, done } = useRow(TODO_TABLE, id);
-	const handlePress = useSetCellCallback(
-		TODO_TABLE,
-		id,
-		DONE_CELL,
-		() => (done) => !done
-	);
-	return (
-		<TouchableOpacity
-			key={id}
-			onPress={handlePress}
-			style={[styles.todo, done ? styles.done : null]}
-		>
-			<Text style={styles.todoText}>
-				{done ? DONE_ICON : NOT_DONE_ICON} {text}
-			</Text>
-		</TouchableOpacity>
-	);
-};
-
-// A list component to show all the todos.
-const Todos = () => {
-	const renderItem = ({ item: id }: any) => <Todo id={id} />;
-	return (
-		<FlatList
-			data={useSortedRowIds(TODO_TABLE, DONE_CELL)}
-			renderItem={renderItem}
-			style={styles.todos}
-		/>
-	);
-};
 
 // A button component to delete all the todos, only shows when there are some.
-const ClearTodos = () => {
+export const ClearTodos = () => {
 	const handlePress = useDelTableCallback(TODO_TABLE);
 	return useHasTable(TODO_TABLE) ? (
 		<TouchableOpacity onPress={handlePress}>
@@ -95,92 +139,63 @@ const ClearTodos = () => {
 	) : null;
 };
 
-export default function NotepadScreen() {
+export default function TodosScreen() {
 	const [menuVisible, setMenuVisible] = React.useState(false);
+	const [isModalVisible, setModalVisible] = useState(false);
 	const theme = useTheme();
+	const renderItem = ({ item: id }: any) => <TodoItem id={id} />;
+
 	return (
 		<SafeAreaProvider>
 			<StatusBar style={theme.dark ? 'light' : 'dark'} />
-			<SafeAreaView
-				style={[
-					styles.container,
-					{
-						backgroundColor: theme.dark ? '#000' : '#fff',
-					},
-				]}
-			>
-				{/* Header */}
-				<View style={styles.header}>
-					<Text
+			<PaperProvider>
+				<Portal>
+					<Stack.Screen
+						options={{
+							headerShown: true,
+							headerTitle: '',
+							headerStyle: {
+								backgroundColor: theme.colors.surface,
+							},
+
+							header: () => (
+								<CustomHeader
+									menuVisible={menuVisible}
+									title='Todos'
+									setMenuVisible={setMenuVisible}
+								/>
+							),
+						}}
+					/>
+					<SafeAreaView
 						style={[
-							styles.headerText,
+							styles.container,
 							{
-								color: theme.colors.primary,
+								backgroundColor: theme.dark ? '#000' : '#fff',
 							},
 						]}
 					>
-						Todos
-					</Text>
-					<View style={styles.iconContainer}>
-						<TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-							<List color={theme.dark ? '#fff' : '#000'} size={22} />
-						</TouchableOpacity>
-						<TouchableOpacity onPress={() => router.push('settings')}>
-							<Settings color={theme.dark ? '#fff' : '#000'} size={22} />
-						</TouchableOpacity>
-					</View>
-				</View>
-
-				{menuVisible && (
-					<View style={styles.popupMenu}>
-						<TouchableOpacity style={styles.menuItem}>
-							<Text style={[styles.menuText, styles.menuActive]}>
-								☰ List View
-							</Text>
-						</TouchableOpacity>
-						<TouchableOpacity style={styles.menuItem}>
-							<Text style={styles.menuText}>▭ Card View</Text>
-						</TouchableOpacity>
-						<TouchableOpacity style={styles.menuItem}>
-							<Text style={styles.menuText}>▦ Grid View</Text>
-						</TouchableOpacity>
-					</View>
-				)}
-
-				{/* Search Bar */}
-				{useHasTable(TODO_TABLE) && (
-					<View style={styles.searchContainer}>
-						<TextInput
-							style={styles.searchInput}
-							placeholder='Search'
-							placeholderTextColor='gray'
+						<FlatList
+							data={useSortedRowIds(TODO_TABLE, DONE_CELL)}
+							renderItem={renderItem}
+							style={styles.todos}
+							ListEmptyComponent={() => <EmptyState />}
 						/>
-					</View>
-				)}
 
-				{!useHasTable(TODO_TABLE) && (
-					<View
-						style={{
-							flex: 1,
-							justifyContent: 'center',
-							alignItems: 'center',
-							marginTop: -100,
-						}}
-					>
-						<CircleCheckBig size={80} color={'#555'} />
-						<Text style={{ color: '#444', margin: 10 }}>No data</Text>
-					</View>
-				)}
-
-				<NewTodo />
-				<Todos />
-				<ClearTodos />
-
-				{/* Floating Add Button */}
-				<TouchableOpacity style={styles.addButton}>
-					<Plus color={'yellow'} />
-				</TouchableOpacity>
-			</SafeAreaView>
+						{/* Floating Add Button */}
+						<TouchableOpacity
+							style={styles.addButton}
+							onPress={() => setModalVisible(true)}
+						>
+							<Plus color={'yellow'} />
+						</TouchableOpacity>
+						<AddTodoModel
+							visible={isModalVisible}
+							setVisible={setModalVisible}
+						/>
+					</SafeAreaView>
+				</Portal>
+			</PaperProvider>
 		</SafeAreaProvider>
 	);
 }
@@ -188,14 +203,10 @@ export default function NotepadScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		paddingTop: 10,
 	},
-	header: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		paddingHorizontal: 20,
-		paddingBottom: 10,
+	todos: {
+		flex: 1,
+		marginTop: 10,
 	},
 
 	input: {
@@ -208,37 +219,14 @@ const styles = StyleSheet.create({
 		padding: 16,
 		fontSize: 20,
 	},
-	todos: {
-		flex: 1,
-		marginTop: 16,
-	},
-	todo: {
-		borderRadius: 8,
-		marginBottom: 16,
-		padding: 16,
-		backgroundColor: '#ffd',
-	},
-	done: {
-		backgroundColor: '#dfd',
-	},
-	todoText: {
-		fontSize: 20,
-	},
+
 	clearTodos: {
 		margin: 16,
 		flex: 0,
 		textAlign: 'center',
 		fontSize: 16,
 	},
-	headerText: {
-		color: '#fff',
-		fontSize: 28,
-		fontWeight: 'bold',
-	},
-	iconContainer: {
-		flexDirection: 'row',
-		gap: 20,
-	},
+
 	icon: {
 		color: '#fff',
 		fontSize: 20,
@@ -280,30 +268,6 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 	},
 	navActive: {
-		color: 'yellow',
-	},
-	popupMenu: {
-		position: 'absolute',
-		top: 50,
-		right: 50,
-		backgroundColor: '#222',
-		padding: 10,
-		borderRadius: 10,
-		shadowColor: '#000',
-		shadowOpacity: 0.3,
-		shadowRadius: 5,
-		shadowOffset: { width: 0, height: 2 },
-		zIndex: 10,
-	},
-	menuItem: {
-		paddingVertical: 10,
-		paddingHorizontal: 15,
-	},
-	menuText: {
-		color: '#fff',
-		fontSize: 16,
-	},
-	menuActive: {
 		color: 'yellow',
 	},
 });

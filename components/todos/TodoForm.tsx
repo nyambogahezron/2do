@@ -1,285 +1,241 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { TextInput, Button, HelperText, useTheme, Text, SegmentedButtons, Chip } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import { useStore } from '../../context/StoreContext';
-import { TABLES, Todo } from '../../models/schema';
-import { v4 as uuidv4 } from 'uuid';
+import { View, StyleSheet } from 'react-native';
+import {
+	TextInput,
+	Button,
+	HelperText,
+	Subheading,
+	RadioButton,
+	Text,
+} from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { getCurrentTimestamp } from '../../utils/dateUtils';
+import { validateTodoForm } from '@/utils/validation';
+import { Todo } from '@/app/(tabs)';
+import useGenerateId from '@/utils/generateId';
+import { useAddRowCallback } from 'tinybase/ui-react';
 
-interface TodoFormProps {
-  todo?: Todo;
-  onSave?: (formData?: any) => void;
-}
+const TODO_TABLE = 'todo';
+const ID_CELL = 'id';
+const TEXT_CELL = 'text';
+const DONE_CELL = 'done';
+const PRIORITY_CELL = 'priority';
+const DUE_DATE_CELL = 'dueDate';
+const CREATED_AT_CELL = 'createdAt';
+const UPDATED_AT_CELL = 'updatedAt';
 
-const TodoForm: React.FC<TodoFormProps> = ({ todo, onSave }) => {
-  const { store } = useStore();
-  const navigation = useNavigation();
-  const theme = useTheme();
-  const isEditing = !!todo;
-
-  // Form state
-  const [title, setTitle] = useState(todo?.title || '');
-  const [description, setDescription] = useState(todo?.description || '');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(todo?.priority || 'medium');
-  const [category, setCategory] = useState(todo?.category || '');
-  const [dueDate, setDueDate] = useState<Date | undefined>(
-    todo?.dueDate ? new Date(todo.dueDate) : undefined
-  );
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  
-  // Input validation
-  const [titleError, setTitleError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const validateForm = (): boolean => {
-    let isValid = true;
-
-    if (!title.trim()) {
-      setTitleError('Title is required');
-      isValid = false;
-    } else {
-      setTitleError('');
-    }
-
-    return isValid;
-  };
-
-  const handleSave = async () => {
-    if (!store || !validateForm()) return;
-
-    try {
-      setIsSubmitting(true);
-      const timestamp = getCurrentTimestamp();
-      
-      if (isEditing && todo) {
-        // Update existing todo
-        store.setRow(TABLES.TODOS, todo.id, {
-          ...todo,
-          title,
-          description,
-          priority,
-          category: category || undefined,
-          dueDate: dueDate?.toISOString(),
-          updatedAt: timestamp,
-        });
-      } else {
-        // Create new todo
-        const newTodoId = uuidv4();
-        store.setRow(TABLES.TODOS, newTodoId, {
-          title,
-          description: description || undefined,
-          completed: false,
-          priority,
-          category: category || undefined,
-          dueDate: dueDate?.toISOString(),
-          createdAt: timestamp,
-          updatedAt: timestamp,
-        });
-      }
-
-      if (onSave) {
-        onSave({
-          title,
-          description,
-          priority,
-          category,
-          dueDate: dueDate?.toISOString()
-        });
-      } else {
-        navigation.goBack();
-      }
-    } catch (error) {
-      console.error('Error saving todo:', error);
-      Alert.alert('Error', 'Failed to save todo');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      setDueDate(selectedDate);
-    }
-  };
-
-  const categories = ['Personal', 'Work', 'Shopping', 'Health', 'Family']; // Predefined categories
-
-  return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView style={styles.container}>
-        <TextInput
-          label="Title *"
-          value={title}
-          onChangeText={setTitle}
-          mode="outlined"
-          error={!!titleError}
-          style={styles.input}
-        />
-        {!!titleError && <HelperText type="error">{titleError}</HelperText>}
-
-        <TextInput
-          label="Description"
-          value={description}
-          onChangeText={setDescription}
-          mode="outlined"
-          multiline
-          numberOfLines={4}
-          style={styles.input}
-        />
-
-        <Text style={styles.sectionTitle}>Priority</Text>
-        <SegmentedButtons
-          value={priority}
-          onValueChange={(value) => setPriority(value as 'low' | 'medium' | 'high')}
-          buttons={[
-            { value: 'low', label: 'Low' },
-            { value: 'medium', label: 'Medium' },
-            { value: 'high', label: 'High' },
-          ]}
-          style={styles.segmentedButton}
-        />
-
-        <Text style={styles.sectionTitle}>Category</Text>
-        <TextInput
-          label="Category"
-          value={category}
-          onChangeText={setCategory}
-          mode="outlined"
-          style={styles.input}
-        />
-        
-        <View style={styles.categoryChips}>
-          {categories.map((cat) => (
-            <Chip 
-              key={cat}
-              style={styles.chip}
-              onPress={() => setCategory(cat)}
-              selected={category === cat}
-            >
-              {cat}
-            </Chip>
-          ))}
-        </View>
-
-        <Text style={styles.sectionTitle}>Due Date</Text>
-        <View style={styles.dateContainer}>
-          <Button 
-            mode="outlined" 
-            onPress={() => setShowDatePicker(true)}
-            icon="calendar"
-            style={styles.dateButton}
-          >
-            {dueDate ? dueDate.toLocaleDateString() : 'Set Due Date'}
-          </Button>
-          
-          {dueDate && (
-            <Button 
-              mode="text" 
-              onPress={() => setDueDate(undefined)}
-              textColor={theme.colors.error}
-            >
-              Clear
-            </Button>
-          )}
-        </View>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={dueDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={onDateChange}
-            minimumDate={new Date()}
-          />
-        )}
-
-        <View style={styles.buttonContainer}>
-          <Button
-            mode="contained"
-            onPress={handleSave}
-            loading={isSubmitting}
-            disabled={isSubmitting}
-            style={styles.button}
-          >
-            {isEditing ? 'Update' : 'Create'} Todo
-          </Button>
-          
-          <Button
-            mode="outlined"
-            onPress={() => {
-              if (onSave) {
-                onSave({
-                  title,
-                  description,
-                  priority,
-                  category,
-                  dueDate: dueDate?.toISOString()
-                });
-              } else {
-                navigation.goBack();
-              }
-            }}
-            style={[styles.button, styles.cancelButton]}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+type TodoFormProps = {
+	initialData?: Partial<Todo>;
+	onCancel: () => void;
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  input: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  segmentedButton: {
-    marginBottom: 16,
-  },
-  categoryChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  chip: {
-    margin: 4,
-  },
-  dateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  dateButton: {
-    flex: 1,
-    marginRight: 8,
-  },
-  buttonContainer: {
-    marginTop: 16,
-    marginBottom: 32,
-  },
-  button: {
-    marginBottom: 12,
-  },
-  cancelButton: {
-    marginBottom: 24,
-  },
-});
+export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
+	const nowDate = new Date().toISOString();
+	const itemId = useGenerateId();
 
-export default TodoForm;
+	const [title, setTitle] = useState(initialData?.text || '');
+	const [priority, setPriority] = useState<Todo['priority']>(
+		initialData?.priority || 'medium'
+	);
+	const [dueDate, setDueDate] = useState<Date | null>(
+		initialData?.dueDate ? new Date(initialData.dueDate) : null
+	);
+	const [text, setText] = useState('');
+	const [done, setDone] = useState(false);
+	const [createdAt, setCreatedAt] = useState(nowDate);
+	const [updatedAt, setUpdatedAt] = useState(nowDate);
+	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
+	const handleSubmitEditing = useAddRowCallback(
+		TODO_TABLE,
+		({
+			nativeEvent: { id, text, done, priority, dueDate, createdAt, updatedAt },
+		}: {
+			nativeEvent: {
+				id: string;
+				text: string;
+				done: boolean;
+				priority: string;
+				dueDate: string;
+				createdAt: string;
+				updatedAt: string;
+			};
+		}) => {
+			return {
+				[ID_CELL]: id,
+				[TEXT_CELL]: text,
+				[DONE_CELL]: done,
+				[PRIORITY_CELL]: priority,
+				[DUE_DATE_CELL]: dueDate,
+				[CREATED_AT_CELL]: createdAt,
+				[UPDATED_AT_CELL]: updatedAt,
+			};
+		}
+	);
+
+	const handleSubmit = () => {
+		const errors = validateTodoForm({ title });
+
+		if (Object.keys(errors).length > 0) {
+			setFormErrors(errors);
+			return;
+		}
+
+		// If the form is valid, submit the data
+		handleSubmitEditing({
+			nativeEvent: {
+				id: itemId,
+				text: title,
+				done,
+				priority,
+				dueDate: dueDate?.toISOString() || '',
+				createdAt,
+				updatedAt,
+			},
+		});
+
+		// create the todo
+		onCancel();
+		setTitle('');
+		setPriority('medium');
+		setDueDate(null);
+	};
+
+	const handleDateChange = (event: any, selectedDate?: Date) => {
+		setShowDatePicker(false);
+		if (selectedDate) {
+			setDueDate(selectedDate);
+		}
+	};
+
+	return (
+		<View style={styles.container}>
+			<TextInput
+				label='Title'
+				value={title}
+				onChangeText={(text) => {
+					setTitle(text);
+					if (formErrors.title) {
+						const newErrors = { ...formErrors };
+						delete newErrors.title;
+						setFormErrors(newErrors);
+					}
+				}}
+				mode='outlined'
+				error={!!formErrors.title}
+				style={styles.input}
+			/>
+			{formErrors.title && (
+				<HelperText type='error' visible={!!formErrors.title}>
+					{formErrors.title}
+				</HelperText>
+			)}
+
+			<Subheading style={styles.sectionTitle}>Priority</Subheading>
+			<View style={styles.priorityContainer}>
+				<View style={styles.priorityOption}>
+					<RadioButton
+						value='low'
+						status={priority === 'low' ? 'checked' : 'unchecked'}
+						onPress={() => setPriority('low')}
+					/>
+					<Text>Low</Text>
+				</View>
+
+				<View style={styles.priorityOption}>
+					<RadioButton
+						value='medium'
+						status={priority === 'medium' ? 'checked' : 'unchecked'}
+						onPress={() => setPriority('medium')}
+					/>
+					<Text>Medium</Text>
+				</View>
+
+				<View style={styles.priorityOption}>
+					<RadioButton
+						value='high'
+						status={priority === 'high' ? 'checked' : 'unchecked'}
+						onPress={() => setPriority('high')}
+					/>
+					<Text>High</Text>
+				</View>
+			</View>
+
+			<Subheading style={styles.sectionTitle}>Due Date</Subheading>
+			<Button
+				mode='outlined'
+				onPress={() => setShowDatePicker(true)}
+				style={styles.dateButton}
+			>
+				{dueDate ? dueDate.toLocaleDateString() : 'Set due date'}
+			</Button>
+			{dueDate && (
+				<Button
+					mode='text'
+					onPress={() => setDueDate(null)}
+					style={styles.clearButton}
+				>
+					Clear date
+				</Button>
+			)}
+
+			{showDatePicker && (
+				<DateTimePicker
+					value={dueDate || new Date()}
+					mode='date'
+					display='default'
+					onChange={handleDateChange}
+				/>
+			)}
+
+			<View style={styles.buttonsContainer}>
+				<Button mode='outlined' onPress={onCancel} style={styles.button}>
+					Cancel
+				</Button>
+				<Button mode='contained' onPress={handleSubmit} style={styles.button}>
+					{initialData?.id ? 'Update' : 'Create'}
+				</Button>
+			</View>
+		</View>
+	);
+}
+
+const styles = StyleSheet.create({
+	container: {
+		height: 'auto',
+		width: '100%',
+		borderRadius: 8,
+		padding: 16,
+		backgroundColor: 'white',
+	},
+	input: {
+		marginBottom: 16,
+	},
+	sectionTitle: {
+		marginBottom: 8,
+	},
+	priorityContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginBottom: 16,
+	},
+	priorityOption: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	dateButton: {
+		marginBottom: 8,
+	},
+	clearButton: {
+		marginBottom: 16,
+	},
+	buttonsContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginTop: 16,
+	},
+	button: {
+		flex: 1,
+		marginHorizontal: 4,
+	},
+});

@@ -1,286 +1,173 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Text, Card, Button, List, Divider, useTheme, IconButton } from 'react-native-paper';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useStore } from '../../context/StoreContext';
-import { TABLES, Todo } from '../../models/schema';
-import { RootStackParamList } from '../../types';
-import { formatDateTime, isPastDue } from '../../utils/dateUtils';
-import { LoadingIndicator } from '../ui/LoadingIndicator';
-import { ErrorDisplay } from '../ui/ErrorDisplay';
-import TodoForm from './TodoForm';
+import { priorityColors } from '@/lib/utils';
+import { Circle, CircleCheckBig } from 'lucide-react-native';
+import {
+	StyleSheet,
+	TouchableOpacity,
+	View,
+	Text,
+	Dimensions,
+} from 'react-native';
+import {
+	useDelRowCallback,
+	useRow,
+	useSetCellCallback,
+} from 'tinybase/ui-react';
 
-type TodoItemRouteProp = RouteProp<RootStackParamList, 'TodoDetail'>;
-type TodoItemNavigationProp = NativeStackNavigationProp<RootStackParamList, 'TodoDetail'>;
+const TODO_TABLE = 'todo';
+const DONE_CELL = 'done';
 
-const TodoItem: React.FC = () => {
-  const { store } = useStore();
-  const theme = useTheme();
-  const route = useRoute<TodoItemRouteProp>();
-  const navigation = useNavigation<TodoItemNavigationProp>();
-  const { id } = route.params;
+const width = Dimensions.get('window').width;
 
-  const [todo, setTodo] = useState<Todo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+export default function TodoItem({ id }: { id: string }) {
+	const {
+		id: todoId,
+		text,
+		done,
+		priority,
+		dueDate,
+		createdAt,
+		updatedAt,
+	} = useRow(TODO_TABLE, id) as {
+		id: string;
+		text: string;
+		done: boolean;
+		priority: 'low' | 'medium' | 'high';
+		dueDate: string;
+		createdAt: string;
+		updatedAt: string;
+	};
+	const handlePress = useSetCellCallback(
+		TODO_TABLE,
+		id,
+		DONE_CELL,
+		() => (done) => !done
+	);
+	const handleDelete = useDelRowCallback(TODO_TABLE, id);
+	const color = priorityColors[priority as 'low' | 'medium' | 'high'];
 
-  useEffect(() => {
-    loadTodo();
-    
-    // Set up listener for changes to this specific todo
-    if (store) {
-      const listener = () => loadTodo();
-      store.addRowListener(TABLES.TODOS, id, listener);
-      return () => {
-        store.removeRowListener(TABLES.TODOS, id, listener);
-      };
-    }
-  }, [id, store]);
+	//show due date month/day when curren year is same as due date year
+	const currentDate = new Date(); // 1/1/2022 12:00:00
+	const currentYear = currentDate.getFullYear(); // 2022
+	const dueDateYear = new Date(dueDate).getFullYear();
 
-  const loadTodo = () => {
-    if (!store) {
-      setError(new Error('Store not initialized'));
-      setLoading(false);
-      return;
-    }
+	const getDueDate = () => {
+		if (currentYear === dueDateYear && dueDate !== null) {
+			return new Date(dueDate).toLocaleDateString('en-US', {
+				month: 'short',
+				day: 'numeric',
+			});
+		}
+		if (currentYear !== dueDateYear && dueDate !== null) {
+			return new Date(dueDate).toLocaleDateString('en-US', {
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric',
+			});
+		}
 
-    try {
-      setLoading(true);
-      const todoData = store.getRow(TABLES.TODOS, id);
-      
-      if (!todoData) {
-        setError(new Error('Todo not found'));
-        setTodo(null);
-      } else {
-        setTodo({ ...todoData, id } as Todo);
-        setError(null);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error('Unknown error loading todo'));
-    } finally {
-      setLoading(false);
-    }
-  };
+		if (dueDate === null || dueDate === '' || dueDate === undefined) {
+			return '';
+		}
+	};
+	const showDueDate = getDueDate();
 
-  const handleToggleComplete = () => {
-    if (!store || !todo) return;
+	return (
+		<View style={styles.container}>
+			{/* toggle icon  */}
+			<TouchableOpacity onPress={handlePress} style={styles.iconsWrapper}>
+				{done ? (
+					<CircleCheckBig style={styles.icon} size={25} />
+				) : (
+					<Circle style={styles.icon} size={25} />
+				)}
+			</TouchableOpacity>
 
-    try {
-      store.setCell(TABLES.TODOS, id, 'completed', !todo.completed);
-      store.setCell(TABLES.TODOS, id, 'updatedAt', new Date().toISOString());
-    } catch (error) {
-      console.error('Error toggling todo completion:', error);
-      Alert.alert('Error', 'Failed to update todo status');
-    }
-  };
+			<TouchableOpacity key={id} style={styles.todo}>
+				<Text style={[styles.todoText, done ? styles.done : null]}>{text}</Text>
 
-  const handleDelete = () => {
-    Alert.alert(
-      'Delete Todo',
-      'Are you sure you want to delete this todo?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            if (!store) return;
-            
-            try {
-              store.delRow(TABLES.TODOS, id);
-              navigation.goBack();
-            } catch (error) {
-              console.error('Error deleting todo:', error);
-              Alert.alert('Error', 'Failed to delete todo');
-            }
-          }
-        },
-      ]
-    );
-  };
+				<View style={styles.action}>
+					{!done && (
+						<>
+							<Text style={styles.date}>{showDueDate}</Text>
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return theme.colors.highPriority;
-      case 'medium':
-        return theme.colors.mediumPriority;
-      case 'low':
-        return theme.colors.lowPriority;
-      default:
-        return theme.colors.backdrop;
-    }
-  };
-
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'High Priority';
-      case 'medium':
-        return 'Medium Priority';
-      case 'low':
-        return 'Low Priority';
-      default:
-        return 'No Priority';
-    }
-  };
-
-  if (loading) {
-    return <LoadingIndicator message="Loading todo..." />;
-  }
-
-  if (error) {
-    return <ErrorDisplay error={error} retry={loadTodo} />;
-  }
-
-  if (!todo) {
-    return (
-      <ErrorDisplay 
-        error={new Error('Todo not found')} 
-        retry={() => navigation.goBack()}
-      />
-    );
-  }
-
-  if (isEditing) {
-    return <TodoForm todo={todo} onSave={() => setIsEditing(false)} />;
-  }
-
-  const dueDateColor = todo.dueDate && isPastDue(todo.dueDate) && !todo.completed
-    ? theme.colors.error
-    : theme.colors.text;
-
-  return (
-    <ScrollView style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <View style={styles.headerContainer}>
-            <Text style={styles.title}>{todo.title}</Text>
-            <IconButton
-              icon="pencil"
-              size={20}
-              onPress={() => setIsEditing(true)}
-            />
-          </View>
-          
-          <View 
-            style={[
-              styles.priorityBadge, 
-              { backgroundColor: getPriorityColor(todo.priority) }
-            ]}
-          >
-            <Text style={styles.priorityText}>
-              {getPriorityText(todo.priority)}
-            </Text>
-          </View>
-          
-          {todo.description && (
-            <Text style={styles.description}>{todo.description}</Text>
-          )}
-          
-          <Divider style={styles.divider} />
-          
-          <List.Item
-            title="Status"
-            description={todo.completed ? 'Completed' : 'Active'}
-            left={props => <List.Icon {...props} icon={todo.completed ? "check-circle" : "circle-outline"} />}
-          />
-          
-          {todo.dueDate && (
-            <List.Item
-              title="Due Date"
-              description={formatDateTime(todo.dueDate)}
-              descriptionStyle={{ color: dueDateColor }}
-              left={props => <List.Icon {...props} icon="calendar" />}
-            />
-          )}
-          
-          {todo.category && (
-            <List.Item
-              title="Category"
-              description={todo.category}
-              left={props => <List.Icon {...props} icon="tag" />}
-            />
-          )}
-          
-          <List.Item
-            title="Created"
-            description={formatDateTime(todo.createdAt)}
-            left={props => <List.Icon {...props} icon="clock" />}
-          />
-          
-          <List.Item
-            title="Last Updated"
-            description={formatDateTime(todo.updatedAt)}
-            left={props => <List.Icon {...props} icon="update" />}
-          />
-        </Card.Content>
-        
-        <Card.Actions style={styles.actions}>
-          <Button 
-            mode="contained" 
-            onPress={handleToggleComplete}
-            style={{ flex: 1, marginRight: 8 }}
-          >
-            {todo.completed ? 'Mark Incomplete' : 'Mark Complete'}
-          </Button>
-          <Button 
-            mode="outlined" 
-            onPress={handleDelete}
-            textColor={theme.colors.error}
-            style={{ flex: 1 }}
-          >
-            Delete
-          </Button>
-        </Card.Actions>
-      </Card>
-    </ScrollView>
-  );
-};
+							<View style={styles.priorityWrapper}>
+								<View
+									style={[styles.priorityCircle, { backgroundColor: color }]}
+								/>
+							</View>
+						</>
+					)}
+				</View>
+			</TouchableOpacity>
+		</View>
+	);
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  card: {
-    marginBottom: 16,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  priorityBadge: {
-    alignSelf: 'flex-start',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-    marginVertical: 8,
-  },
-  priorityText: {
-    color: 'white',
-    fontWeight: '500',
-  },
-  description: {
-    fontSize: 16,
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  divider: {
-    marginVertical: 16,
-  },
-  actions: {
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-});
+	container: {
+		flex: 1,
+		display: 'flex',
+		flexDirection: 'row',
+		backgroundColor: '#f9f9f9',
+		alignItems: 'center',
+		justifyContent: 'flex-start',
+		width: width - 20,
+		paddingVertical: 16,
+		paddingHorizontal: 8,
+		borderRadius: 8,
+		marginBottom: 5,
+		marginHorizontal: 'auto',
+		height: 80,
+	},
+	iconsWrapper: {
+		flexDirection: 'row',
+	},
+	icon: {
+		marginRight: 8,
+		marginLeft: 3,
+		color: '#000',
+	},
+	todos: {
+		marginTop: -10,
+	},
+	todo: {
+		flex: 1,
+		marginLeft: 8,
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'space-between',
+		width: '100%',
+	},
+	action: {
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	date: {
+		marginTop: 8,
+		fontSize: 12,
+		color: '#a9a9a9',
+	},
+	priorityWrapper: {
+		display: 'flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	priorityCircle: {
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		backgroundColor: '#f00',
+		marginRight: 4,
+	},
 
-export default TodoItem;
+	done: {
+		textDecorationStyle: 'solid',
+		textDecorationLine: 'line-through',
+		color: '#a9a9a9',
+	},
+	todoText: {
+		fontSize: 20,
+	},
+});

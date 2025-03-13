@@ -61,7 +61,7 @@ export default function SettingsScreen() {
 					headerTitleStyle: { fontWeight: 'bold' },
 					headerLeft: () => (
 						<Ionicons
-							onPress={() => router.canGoBack()}
+							onPress={() => router.back()}
 							name='arrow-back'
 							size={24}
 							color={theme.colors.secondary}
