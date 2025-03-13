@@ -32,7 +32,9 @@
     "react-native-web": "~0.19.13",
     "tinybase": "^5.4.8",
     "uuid": "^11.1.0",
-    "@react-native-community/datetimepicker": "8.2.0"
+    "@react-native-community/datetimepicker": "8.2.0",
+    "react-native-reanimated": "~3.16.1",
+    "react-native-gesture-handler": "~2.20.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

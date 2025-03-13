@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { Settings } from 'lucide-react-native';
-import { useTheme } from 'react-native-paper';
+
 import { router } from 'expo-router';
 import MenuList from './Menu';
+import { useTheme } from '@/context/ThemeContext';
 
 type CustomHeaderProps = {
 	setMenuVisible: (visible: boolean) => void;
@@ -16,15 +17,17 @@ export default function CustomHeader({
 	menuVisible,
 	title = 'Todos',
 }: CustomHeaderProps) {
-	const theme = useTheme();
+	const { themeClrs } = useTheme();
 	const [visible, setVisible] = React.useState(false);
 	return (
-		<View style={[styles.header, { backgroundColor: theme.colors.surface }]}>
+		<View
+			style={[styles.header, { backgroundColor: themeClrs.colors.background }]}
+		>
 			<Text
 				style={[
 					styles.headerText,
 					{
-						color: theme.colors.primary,
+						color: themeClrs.colors.accent,
 					},
 				]}
 			>
@@ -35,7 +38,7 @@ export default function CustomHeader({
 					<MenuList visible={visible} setVisible={() => setVisible(!visible)} />
 				</TouchableOpacity>
 				<TouchableOpacity onPress={() => router.push('settings')}>
-					<Settings color={theme.dark ? '#fff' : '#000'} size={22} />
+					<Settings color={themeClrs.colors.text} size={22} />
 				</TouchableOpacity>
 			</View>
 		</View>
@@ -51,10 +54,9 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		height: 85,
 		paddingTop: 45,
-		backgroundColor: '#fff',
 	},
 	headerText: {
-		fontSize: 28,
+		fontSize: 25,
 		fontWeight: 'bold',
 	},
 	iconContainer: {

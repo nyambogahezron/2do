@@ -10,7 +10,8 @@ import {
 	useCreateStore,
 } from 'tinybase/ui-react';
 import { Stack } from 'expo-router';
-import { PaperProvider } from 'react-native-paper';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // The main app.
 const App = () => {
@@ -38,14 +39,16 @@ const App = () => {
 	useAndStartPersister(store);
 
 	return (
-		<PaperProvider>
-			<Provider store={store}>
-				<Stack>
-					<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-					<Stack.Screen name='settings' />
-				</Stack>
-			</Provider>
-		</PaperProvider>
+		<ThemeProvider>
+			<GestureHandlerRootView>
+				<Provider store={store}>
+					<Stack>
+						<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+						<Stack.Screen name='settings' />
+					</Stack>
+				</Provider>
+			</GestureHandlerRootView>
+		</ThemeProvider>
 	);
 };
 

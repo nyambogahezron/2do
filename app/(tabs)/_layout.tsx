@@ -1,20 +1,22 @@
+import { useTheme } from '@/context/ThemeContext';
 import { Tabs } from 'expo-router';
 import { ListTodo, NotebookText, ShoppingCart } from 'lucide-react-native';
 
 export default function TabLayout() {
+	const { themeClrs } = useTheme();
 	return (
 		<Tabs
 			initialRouteName='index'
 			screenOptions={{
 				headerShown: false,
 				tabBarStyle: {
-					backgroundColor: '#000',
+					backgroundColor: themeClrs.colors.background,
 					shadowColor: 'transparent',
 					height: 55,
 					borderWidth: 0,
 					borderColor: 'transparent',
 				},
-				tabBarActiveTintColor: '#FFD700',
+				tabBarActiveTintColor: themeClrs.colors.accent,
 				tabBarLabelStyle: {
 					fontSize: 10,
 					fontWeight: 'bold',

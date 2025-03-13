@@ -13,6 +13,7 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme as ThemeContext } from '@/context/ThemeContext';
 
 export default function SettingsScreen() {
 	const theme = useTheme();
@@ -20,9 +21,10 @@ export default function SettingsScreen() {
 	const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 	const [syncEnabled, setSyncEnabled] = useState(false);
 	const [clearDataDialogVisible, setClearDataDialogVisible] = useState(false);
+	const { toggleTheme, theme: currentTheme } = ThemeContext();
 
 	const toggleDarkMode = () => {
-		setDarkMode(!darkMode);
+		toggleTheme();
 	};
 
 	const toggleNotifications = () => {
@@ -54,8 +56,9 @@ export default function SettingsScreen() {
 					headerShown: true,
 					headerTitle: 'Settings',
 					headerTitleAlign: 'center',
+					headerShadowVisible: false,
 					headerStyle: {
-						backgroundColor: theme.colors.surface,
+						backgroundColor: theme.colors.background,
 					},
 					headerTintColor: theme.colors.secondary,
 					headerTitleStyle: { fontWeight: 'bold' },
@@ -73,6 +76,7 @@ export default function SettingsScreen() {
 			<ScrollView
 				style={{
 					marginTop: Platform.OS === 'ios' ? 0 : -50,
+					backgroundColor: theme.colors.background,
 				}}
 			>
 				<List.Section>

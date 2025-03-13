@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Modal, IconButton } from 'react-native-paper';
 import TodoForm from './TodoForm';
 import { View } from 'react-native';
+import { useTheme } from '@/context/ThemeContext';
 
 type props = {
 	visible: boolean;
@@ -11,13 +12,17 @@ type props = {
 
 export default function AddTodoModel({ visible, setVisible }: props) {
 	const hideModal = () => setVisible(false);
+	const { themeClrs } = useTheme();
 
 	return (
 		<Modal
 			style={styles.modal}
 			visible={visible}
 			onDismiss={hideModal}
-			contentContainerStyle={styles.containerStyle}
+			contentContainerStyle={[
+				styles.containerStyle,
+				{ backgroundColor: themeClrs.colors.card },
+			]}
 		>
 			{/* close icon  */}
 			<View style={styles.closeView}>

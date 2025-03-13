@@ -18,7 +18,7 @@ export default function MenuList({ visible, setVisible }: MenuListProps) {
 				style={{ backgroundColor: theme.colors.surface, marginTop: 75 }}
 				visible={visible}
 				onDismiss={closeMenu}
-				anchor={<List color={theme.dark ? '#fff' : '#000'} size={22} />}
+				anchor={<List color={theme.colors.text} size={22} />}
 			>
 				<Menu.Item
 					leadingIcon='format-list-bulleted'

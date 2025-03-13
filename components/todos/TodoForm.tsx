@@ -13,6 +13,7 @@ import { validateTodoForm } from '@/utils/validation';
 import { Todo } from '@/app/(tabs)';
 import useGenerateId from '@/utils/generateId';
 import { useAddRowCallback } from 'tinybase/ui-react';
+import { useTheme } from '@/context/ThemeContext';
 
 const TODO_TABLE = 'todo';
 const ID_CELL = 'id';
@@ -29,6 +30,7 @@ type TodoFormProps = {
 };
 
 export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
+	const { themeClrs } = useTheme();
 	const nowDate = new Date().toISOString();
 	const itemId = useGenerateId();
 
@@ -109,7 +111,9 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 	};
 
 	return (
-		<View style={styles.container}>
+		<View
+			style={[styles.container, { backgroundColor: themeClrs.colors.card }]}
+		>
 			<TextInput
 				label='Title'
 				value={title}
@@ -123,23 +127,36 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 				}}
 				mode='outlined'
 				error={!!formErrors.title}
-				style={styles.input}
+				style={[
+					styles.input,
+					{
+						backgroundColor: themeClrs.colors.surface,
+						color: themeClrs.colors.text,
+					},
+				]}
+				placeholderTextColor={themeClrs.colors.text}
 			/>
+			{/* Show the error message if the title is invalid */}
 			{formErrors.title && (
 				<HelperText type='error' visible={!!formErrors.title}>
 					{formErrors.title}
 				</HelperText>
 			)}
 
-			<Subheading style={styles.sectionTitle}>Priority</Subheading>
+			<Subheading
+				style={[styles.sectionTitle, { color: themeClrs.colors.text }]}
+			>
+				Priority
+			</Subheading>
 			<View style={styles.priorityContainer}>
 				<View style={styles.priorityOption}>
 					<RadioButton
+						color={themeClrs.colors.onBackground}
 						value='low'
 						status={priority === 'low' ? 'checked' : 'unchecked'}
 						onPress={() => setPriority('low')}
 					/>
-					<Text>Low</Text>
+					<Text style={{ color: themeClrs.colors.text }}>Low</Text>
 				</View>
 
 				<View style={styles.priorityOption}>
@@ -148,7 +165,7 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 						status={priority === 'medium' ? 'checked' : 'unchecked'}
 						onPress={() => setPriority('medium')}
 					/>
-					<Text>Medium</Text>
+					<Text style={{ color: themeClrs.colors.text }}>Medium</Text>
 				</View>
 
 				<View style={styles.priorityOption}>
@@ -157,11 +174,15 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 						status={priority === 'high' ? 'checked' : 'unchecked'}
 						onPress={() => setPriority('high')}
 					/>
-					<Text>High</Text>
+					<Text style={{ color: themeClrs.colors.text }}>High</Text>
 				</View>
 			</View>
 
-			<Subheading style={styles.sectionTitle}>Due Date</Subheading>
+			<Subheading
+				style={[styles.sectionTitle, { color: themeClrs.colors.text }]}
+			>
+				Due Date
+			</Subheading>
 			<Button
 				mode='outlined'
 				onPress={() => setShowDatePicker(true)}
@@ -189,9 +210,6 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 			)}
 
 			<View style={styles.buttonsContainer}>
-				<Button mode='outlined' onPress={onCancel} style={styles.button}>
-					Cancel
-				</Button>
 				<Button mode='contained' onPress={handleSubmit} style={styles.button}>
 					{initialData?.id ? 'Update' : 'Create'}
 				</Button>
@@ -206,7 +224,6 @@ const styles = StyleSheet.create({
 		width: '100%',
 		borderRadius: 8,
 		padding: 16,
-		backgroundColor: 'white',
 	},
 	input: {
 		marginBottom: 16,

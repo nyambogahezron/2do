@@ -9,6 +9,10 @@ export const lightTheme = {
 		background: '#ffffff',
 		surface: '#f2f2f2',
 		text: '#000000',
+		onSurfaceVariant: '#000000',
+		card: '#f2f2f2',
+		border: '#f2f2f2',
+		notification: '#3498db',
 	},
 };
 
@@ -21,5 +25,13 @@ export const darkTheme = {
 		background: '#000000',
 		surface: '#121212',
 		text: '#ffffff',
+		onSurfaceVariant: '#ffffff',
+		card: '#121212',
+		border: '#121212',
+		notification: '#3498db',
 	},
 };
+
+export type lightThemeTypes = typeof lightTheme;
+
+export type darkThemeTypes = typeof darkTheme;
