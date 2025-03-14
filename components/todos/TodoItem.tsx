@@ -14,6 +14,7 @@ import {
 	useSetCellCallback,
 } from 'tinybase/ui-react';
 import SwipeableRow from '../ui/SwipeableRow';
+import React from 'react';
 const width = Dimensions.get('window').width;
 
 const TODO_TABLE = 'todo';
@@ -76,7 +77,7 @@ export default function TodoItem({ id }: { id: string }) {
 	const styles = createStyles(themeClrs);
 
 	return (
-		<SwipeableRow onDelete={handleDelete} key={id}>
+		<SwipeableRow onSwipe={handleDelete} key={id}>
 			<View style={styles.container}>
 				{/* toggle icon  */}
 				<TouchableOpacity onPress={handlePress} style={styles.iconsWrapper}>
@@ -117,17 +118,13 @@ const createStyles = (themeClrs: any) =>
 			flex: 1,
 			display: 'flex',
 			flexDirection: 'row',
+			width: '100%',
+			minHeight: 65,
 			backgroundColor: themeClrs.colors.surface,
 			alignItems: 'center',
 			justifyContent: 'flex-start',
-			width: width - 20,
-
-			paddingVertical: 16,
-			paddingHorizontal: 8,
+			overflow: 'hidden',
 			borderRadius: 8,
-			marginBottom: 5,
-			marginHorizontal: 10,
-			height: 70,
 		},
 		iconsWrapper: {
 			flexDirection: 'row',
@@ -137,9 +134,7 @@ const createStyles = (themeClrs: any) =>
 			marginLeft: 3,
 			color: themeClrs.colors.text,
 		},
-		todos: {
-			marginTop: -10,
-		},
+		
 		todo: {
 			flex: 1,
 			marginLeft: 8,
@@ -147,6 +142,7 @@ const createStyles = (themeClrs: any) =>
 			flexDirection: 'column',
 			justifyContent: 'space-between',
 			width: '100%',
+			paddingRight: 10,
 		},
 		action: {
 			display: 'flex',

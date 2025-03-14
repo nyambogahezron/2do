@@ -104,6 +104,7 @@ export default function TodosScreen() {
 							style={[styles.container, { marginTop: 10 }]}
 							keyExtractor={(id) => id}
 							ListEmptyComponent={() => <EmptyState />}
+							// contentContainerStyle={{marginBottom:10}}
 						/>
 
 						{/* Floating Add Button */}
