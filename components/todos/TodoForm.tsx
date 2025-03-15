@@ -10,70 +10,36 @@ import {
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { validateTodoForm } from '@/utils/validation';
-import { Todo } from '@/app/(tabs)';
-import useGenerateId from '@/utils/generateId';
-import { useAddRowCallback } from 'tinybase/ui-react';
+import { Todo, useUpdateTodoCallback, updateTodo } from '@/store/todo';
 import { useTheme } from '@/context/ThemeContext';
-
-const TODO_TABLE = 'todo';
-const ID_CELL = 'id';
-const TEXT_CELL = 'text';
-const DONE_CELL = 'done';
-const PRIORITY_CELL = 'priority';
-const DUE_DATE_CELL = 'dueDate';
-const CREATED_AT_CELL = 'createdAt';
-const UPDATED_AT_CELL = 'updatedAt';
+import {  useStore } from 'tinybase/ui-react';
 
 type TodoFormProps = {
-	initialData?: Partial<Todo>;
+	initialData: Todo; 
 	onCancel: () => void;
+	isEditing?: boolean;
 };
 
-export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
+export default function TodoForm({ initialData, onCancel, isEditing = true }: TodoFormProps) {
 	const { themeClrs } = useTheme();
 	const nowDate = new Date().toISOString();
-	const itemId = useGenerateId();
+	const store = useStore();
 
-	const [title, setTitle] = useState(initialData?.text || '');
+	// Initialize form with existing todo data
+	const [title, setTitle] = useState(initialData.text || '');
 	const [priority, setPriority] = useState<Todo['priority']>(
-		initialData?.priority || 'medium'
+		initialData.priority || 'medium'
 	);
 	const [dueDate, setDueDate] = useState<Date | null>(
-		initialData?.dueDate ? new Date(initialData.dueDate) : null
+		initialData.dueDate ? new Date(initialData.dueDate) : null
 	);
-	const [text, setText] = useState('');
-	const [done, setDone] = useState(false);
-	const [createdAt, setCreatedAt] = useState(nowDate);
+	const [done, setDone] = useState(initialData.done || false);
 	const [updatedAt, setUpdatedAt] = useState(nowDate);
 	const [showDatePicker, setShowDatePicker] = useState(false);
 	const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
-	const handleSubmitEditing = useAddRowCallback(
-		TODO_TABLE,
-		({
-			nativeEvent: { id, text, done, priority, dueDate, createdAt, updatedAt },
-		}: {
-			nativeEvent: {
-				id: string;
-				text: string;
-				done: boolean;
-				priority: string;
-				dueDate: string;
-				createdAt: string;
-				updatedAt: string;
-			};
-		}) => {
-			return {
-				[ID_CELL]: id,
-				[TEXT_CELL]: text,
-				[DONE_CELL]: done,
-				[PRIORITY_CELL]: priority,
-				[DUE_DATE_CELL]: dueDate,
-				[CREATED_AT_CELL]: createdAt,
-				[UPDATED_AT_CELL]: updatedAt,
-			};
-		}
-	);
+	// Handler for updating an existing todo using the new todoSchema
+	const handleUpdateRow = useUpdateTodoCallback(initialData.id);
 
 	const handleSubmit = () => {
 		const errors = validateTodoForm({ title });
@@ -83,24 +49,21 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 			return;
 		}
 
-		// If the form is valid, submit the data
-		handleSubmitEditing({
-			nativeEvent: {
-				id: itemId,
+		// Manually update the needed cells before triggering the updatedAt callback
+		if (store) {
+			store.setPartialRow('todo', initialData.id, {
 				text: title,
-				done,
-				priority,
+				done: done,
+				priority: priority,
 				dueDate: dueDate?.toISOString() || '',
-				createdAt,
-				updatedAt,
-			},
-		});
+			});
+		}
+		
+		// Update the updatedAt timestamp
+		handleUpdateRow();
 
-		// create the todo
+		// Close the modal
 		onCancel();
-		setTitle('');
-		setPriority('medium');
-		setDueDate(null);
 	};
 
 	const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -181,6 +144,32 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 			<Subheading
 				style={[styles.sectionTitle, { color: themeClrs.colors.text }]}
 			>
+				Status
+			</Subheading>
+			<View style={styles.statusContainer}>
+				<View style={styles.statusOption}>
+					<RadioButton
+						color={themeClrs.colors.onBackground}
+						value='pending'
+						status={!done ? 'checked' : 'unchecked'}
+						onPress={() => setDone(false)}
+					/>
+					<Text style={{ color: themeClrs.colors.text }}>Pending</Text>
+				</View>
+
+				<View style={styles.statusOption}>
+					<RadioButton
+						value='done'
+						status={done ? 'checked' : 'unchecked'}
+						onPress={() => setDone(true)}
+					/>
+					<Text style={{ color: themeClrs.colors.text }}>Completed</Text>
+				</View>
+			</View>
+
+			<Subheading
+				style={[styles.sectionTitle, { color: themeClrs.colors.text }]}
+			>
 				Due Date
 			</Subheading>
 			<Button
@@ -210,8 +199,19 @@ export default function TodoForm({ initialData, onCancel }: TodoFormProps) {
 			)}
 
 			<View style={styles.buttonsContainer}>
-				<Button mode='contained' onPress={handleSubmit} style={styles.button}>
-					{initialData?.id ? 'Update' : 'Create'}
+				<Button 
+					mode="outlined" 
+					onPress={onCancel} 
+					style={[styles.button, styles.cancelButton]}
+				>
+					Cancel
+				</Button>
+				<Button 
+					mode='contained' 
+					onPress={handleSubmit} 
+					style={styles.button}
+				>
+					Update
 				</Button>
 			</View>
 		</View>
@@ -240,6 +240,15 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 	},
+	statusContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginBottom: 16,
+	},
+	statusOption: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
 	dateButton: {
 		marginBottom: 8,
 	},
@@ -254,5 +263,8 @@ const styles = StyleSheet.create({
 	button: {
 		flex: 1,
 		marginHorizontal: 4,
+	},
+	cancelButton: {
+		marginRight: 8,
 	},
 });

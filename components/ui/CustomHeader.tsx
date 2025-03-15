@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { Settings } from 'lucide-react-native';
-
-import { router } from 'expo-router';
+import { Menu } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 import MenuList from './Menu';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -10,15 +9,18 @@ type CustomHeaderProps = {
 	setMenuVisible: (visible: boolean) => void;
 	menuVisible: boolean;
 	title?: string;
+	showMenu?: boolean;
 };
 
 export default function CustomHeader({
 	setMenuVisible,
 	menuVisible,
 	title = 'Todos',
+	showMenu = false,
 }: CustomHeaderProps) {
 	const { themeClrs } = useTheme();
 	const [visible, setVisible] = React.useState(false);
+	const navigation = useNavigation<any>();
 	return (
 		<View
 			style={[styles.header, { backgroundColor: themeClrs.colors.background }]}
@@ -34,11 +36,17 @@ export default function CustomHeader({
 				{title}
 			</Text>
 			<View style={styles.iconContainer}>
-				<TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-					<MenuList visible={visible} setVisible={() => setVisible(!visible)} />
-				</TouchableOpacity>
-				<TouchableOpacity onPress={() => router.push('settings')}>
-					<Settings color={themeClrs.colors.text} size={22} />
+				{showMenu && (
+					<TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+						<MenuList
+							visible={visible}
+							setVisible={() => setVisible(!visible)}
+						/>
+					</TouchableOpacity>
+				)}
+
+				<TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+					<Menu color={themeClrs.colors.text} size={24} />
 				</TouchableOpacity>
 			</View>
 		</View>

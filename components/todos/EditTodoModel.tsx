@@ -9,7 +9,7 @@ import { Todo } from '@/store/todo';
 type EditTodoModelProps = {
 	visible: boolean;
 	setVisible: (visible: boolean) => void;
-	todoData: Todo;
+	todoData: Todo; 
 };
 
 export default function EditTodoModel({ visible, setVisible, todoData }: EditTodoModelProps) {
@@ -91,4 +91,4 @@ const styles = StyleSheet.create({
 		height: 40,
 		borderRadius: 25,
 	},
-});
+}); 

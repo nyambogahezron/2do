@@ -1,51 +1,24 @@
 import { useTheme } from '@/context/ThemeContext';
 import { priorityColors } from '@/lib/utils';
 import { Circle, CircleCheckBig } from 'lucide-react-native';
-import {
-	StyleSheet,
-	TouchableOpacity,
-	View,
-	Text,
-	Dimensions,
-} from 'react-native';
-import {
-	useDelRowCallback,
-	useRow,
-	useSetCellCallback,
-} from 'tinybase/ui-react';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { useDeleteTodo, useTodo, useToggleTodoDone } from '@/store/todo';
 import SwipeableRow from '../ui/SwipeableRow';
 import React from 'react';
-const width = Dimensions.get('window').width;
 
-const TODO_TABLE = 'todo';
-const DONE_CELL = 'done';
+interface TodoItemProps {
+	id: string;
+	onEdit?: (todoData: any) => void;
+}
 
-export default function TodoItem({ id }: { id: string }) {
+export default function TodoItem({ id, onEdit }: TodoItemProps) {
 	const { themeClrs } = useTheme();
-	const {
-		id: todoId,
-		text,
-		done,
-		priority,
-		dueDate,
-		createdAt,
-		updatedAt,
-	} = useRow(TODO_TABLE, id) as {
-		id: string;
-		text: string;
-		done: boolean;
-		priority: 'low' | 'medium' | 'high';
-		dueDate: string;
-		createdAt: string;
-		updatedAt: string;
-	};
-	const handlePress = useSetCellCallback(
-		TODO_TABLE,
-		id,
-		DONE_CELL,
-		() => (done) => !done
-	);
-	const handleDelete = useDelRowCallback(TODO_TABLE, id);
+	const todoData = useTodo(id);
+
+	const { id: todoId, text, done, priority, dueDate } = todoData;
+
+	const handlePress = useToggleTodoDone(id);
+	const handleDelete = useDeleteTodo(id);
 	const color = priorityColors[priority as 'low' | 'medium' | 'high'];
 
 	//show due date month/day when curren year is same as due date year
@@ -76,6 +49,13 @@ export default function TodoItem({ id }: { id: string }) {
 
 	const styles = createStyles(themeClrs);
 
+	// Handle edit when todo item is pressed
+	const handleEditPress = () => {
+		if (onEdit) {
+			onEdit(todoData);
+		}
+	};
+
 	return (
 		<SwipeableRow onSwipe={handleDelete} key={id}>
 			<View style={styles.container}>
@@ -88,7 +68,12 @@ export default function TodoItem({ id }: { id: string }) {
 					)}
 				</TouchableOpacity>
 
-				<TouchableOpacity key={id} style={styles.todo}>
+				<TouchableOpacity
+					key={id}
+					style={styles.todo}
+					onPress={handleEditPress}
+					activeOpacity={0.7}
+				>
 					<Text style={[styles.todoText, done ? styles.done : null]}>
 						{text}
 					</Text>
@@ -131,10 +116,10 @@ const createStyles = (themeClrs: any) =>
 		},
 		icon: {
 			marginRight: 8,
-			marginLeft: 3,
+			marginLeft: 10,
 			color: themeClrs.colors.text,
 		},
-		
+
 		todo: {
 			flex: 1,
 			marginLeft: 8,

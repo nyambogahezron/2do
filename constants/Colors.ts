@@ -10,9 +10,9 @@ export const lightTheme = {
 		surface: '#f2f2f2',
 		text: '#000000',
 		onSurfaceVariant: '#000000',
-		card: '#f2f2f2',
 		border: '#f2f2f2',
 		notification: '#3498db',
+		card: '#121212',
 	},
 };
 
@@ -26,9 +26,9 @@ export const darkTheme = {
 		surface: '#121212',
 		text: '#ffffff',
 		onSurfaceVariant: '#ffffff',
-		card: '#121212',
 		border: '#121212',
 		notification: '#3498db',
+		card: '#f2f2f2',
 	},
 };
 
