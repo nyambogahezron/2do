@@ -18,7 +18,6 @@ import { StatusBar } from 'expo-status-bar';
 
 export default function SettingsScreen() {
 	const theme = useTheme();
-	const [darkMode, setDarkMode] = useState(false);
 	const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 	const [syncEnabled, setSyncEnabled] = useState(false);
 	const [clearDataDialogVisible, setClearDataDialogVisible] = useState(false);
@@ -84,6 +83,7 @@ export default function SettingsScreen() {
 			<ScrollView
 				style={{
 					marginTop: Platform.OS === 'ios' ? 0 : -50,
+					paddingHorizontal: 8,
 					backgroundColor: themeClrs.colors.background,
 				}}
 			>
@@ -91,7 +91,7 @@ export default function SettingsScreen() {
 					<List.Subheader>Appearance</List.Subheader>
 					<List.Item
 						titleStyle={{
-							color: themeClrs.colors.card,
+							color: themeClrs.colors.textGrey,
 							marginBottom: 10,
 						}}
 						title='Dark Mode'
@@ -110,7 +110,7 @@ export default function SettingsScreen() {
 					</List.Subheader>
 					<List.Item
 						titleStyle={{
-							color: themeClrs.colors.card,
+							color: themeClrs.colors.textGrey,
 							marginBottom: 10,
 						}}
 						title='Enable Notifications'
@@ -126,23 +126,23 @@ export default function SettingsScreen() {
 					<Divider />
 					<List.Subheader style={{ marginTop: 20 }}>Data</List.Subheader>
 					<List.Item
-						titleStyle={{ color: themeClrs.colors.card, marginBottom: 10 }}
+						titleStyle={{ color: themeClrs.colors.textGrey, marginBottom: 10 }}
 						title='Cloud Sync'
 						description='Sync your data across devices'
-						left={(props) => <List.Icon {...props} icon='cloud-sync' />}
+						left={(props) => <List.Icon {...props} icon='cloud-sync-outline' />}
 						right={(props) => (
 							<Switch value={syncEnabled} onValueChange={toggleSync} />
 						)}
 					/>
 					<List.Item
-						titleStyle={{ color: themeClrs.colors.card, marginBottom: 10 }}
+						titleStyle={{ color: themeClrs.colors.textGrey, marginBottom: 10 }}
 						title='Export Data'
 						description='Save your data as a file'
 						left={(props) => <List.Icon {...props} icon='export' />}
 						onPress={handleExportData}
 					/>
 					<List.Item
-						titleStyle={{ color: themeClrs.colors.card, marginBottom: 10 }}
+						titleStyle={{ color: themeClrs.colors.textGrey, marginBottom: 10 }}
 						title='Clear All Data'
 						description='Remove all your data from this device'
 						left={(props) => (
@@ -155,12 +155,33 @@ export default function SettingsScreen() {
 					<List.Subheader style={{ marginTop: 20 }}>About</List.Subheader>
 					<List.Item
 						titleStyle={{
-							color: themeClrs.colors.card,
+							color: themeClrs.colors.textGrey,
 							marginBottom: 10,
 						}}
 						title='Version'
 						description='1.0.0'
-						left={(props) => <List.Icon {...props} icon='information' />}
+						left={(props) => (
+							<List.Icon {...props} icon='information-outline' />
+						)}
+					/>
+
+					<List.Item
+						titleStyle={{
+							color: themeClrs.colors.textGrey,
+							marginBottom: 10,
+						}}
+						title='Share App'
+						left={(props) => (
+							<List.Icon {...props} icon='share-variant-outline' />
+						)}
+					/>
+					<List.Item
+						titleStyle={{
+							color: themeClrs.colors.textGrey,
+							marginBottom: 10,
+						}}
+						title='Rate us'
+						left={(props) => <List.Icon {...props} icon='star-plus-outline' />}
 					/>
 				</List.Section>
 			</ScrollView>
@@ -171,7 +192,7 @@ export default function SettingsScreen() {
 					onDismiss={hideClearDataDialog}
 					style={{ backgroundColor: theme.colors.background, borderRadius: 10 }}
 				>
-					<Dialog.Title style={{ color: themeClrs.colors.card }}>
+					<Dialog.Title style={{ color: themeClrs.colors.textGrey }}>
 						Clear All Data
 					</Dialog.Title>
 					<Dialog.Content>

@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-	Dimensions,
-	StyleSheet,
-	View,
-} from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import Animated, {
 	useSharedValue,
 	useAnimatedStyle,
@@ -32,20 +28,20 @@ const styles = StyleSheet.create({
 	},
 	container: {
 		overflow: 'hidden',
-		marginBottom: 8,
+		marginBottom: 5,
 	},
 	content: {
 		flex: 1,
 		width: '100%',
-	}
+	},
 });
 
 interface ItemProps {
-		onSwipe: () => void; // to called after a complete swipe
-		children: React.ReactNode
+	onSwipe: () => void; // to called after a complete swipe
+	children: React.ReactNode;
 }
 
-export  default function SwipeableRow({ onSwipe, children }: ItemProps) {
+export default function SwipeableRow({ onSwipe, children }: ItemProps) {
 	const translateX = useSharedValue(0);
 	const offsetX = useSharedValue(0);
 	const height = useSharedValue(HEIGHT);
@@ -68,10 +64,10 @@ export  default function SwipeableRow({ onSwipe, children }: ItemProps) {
 		})
 		.onEnd((event) => {
 			if (isRemoving.value) return;
-			
+
 			const velocity = event.velocityX;
 			const distance = Math.abs(translateX.value);
-			
+
 			if (Math.abs(velocity) < 200 && distance > 20 && distance < 130) {
 				isPaused.value = true;
 				translateX.value = withTiming(-70);
@@ -79,20 +75,21 @@ export  default function SwipeableRow({ onSwipe, children }: ItemProps) {
 			} else {
 				const to = snapPoint(translateX.value, velocity, customSnapPoints);
 				isPaused.value = false;
-				
+
 				translateX.value = withTiming(to, {}, () => {
 					offsetX.value = translateX.value;
 					if (to === -width) {
 						// Start removal sequence directly here
 						isRemoving.value = true;
 						deleteOpacity.value = withTiming(0, { duration: 150 });
-						
+
 						// Animate height down to 0
-						height.value = withTiming(0, 
-							{ 
+						height.value = withTiming(
+							0,
+							{
 								duration: 250,
 								easing: Easing.out(Easing.ease),
-							}, 
+							},
 							() => {
 								// Call onSwipe when done
 								runOnJS(onSwipe)();
@@ -133,20 +130,16 @@ export  default function SwipeableRow({ onSwipe, children }: ItemProps) {
 	return (
 		<Animated.View style={containerStyle}>
 			<View style={[styles.background, backgroundStyle]}>
-				<Action 
-					x={translateX} 
-					deleteOpacity={deleteOpacity} 
+				<Action
+					x={translateX}
+					deleteOpacity={deleteOpacity}
 					isPaused={isPaused}
 					cancelSwipe={cancelSwipe}
 				/>
 			</View>
 			<GestureDetector gesture={panGesture}>
-				<Animated.View style={animatedStyle}>
-					{children}
-				</Animated.View>
+				<Animated.View style={animatedStyle}>{children}</Animated.View>
 			</GestureDetector>
 		</Animated.View>
 	);
-};
-
-
+}

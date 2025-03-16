@@ -86,14 +86,6 @@ export const deleteTodo = (store: Store, id: string): void => {
 	store.delRow(TODO_TABLE, id);
 };
 
-export const toggleTodoDone = (store: Store, id: string): void => {
-	const todo = store.getRow(TODO_TABLE, id) as Todo;
-	if (todo) {
-		store.setCell(TODO_TABLE, id, DONE_CELL, !todo.done);
-		store.setCell(TODO_TABLE, id, UPDATED_AT_CELL, new Date().toISOString());
-	}
-};
-
 // React hooks for components
 export const useTodo = (id: string): Todo => {
 	return useRow(TODO_TABLE, id) as Todo;
@@ -127,7 +119,6 @@ export const useUpdateTodoCallback = (id: string) => {
 };
 
 export const useToggleTodoDone = (id: string) => {
-	// Use a direct function that gets the current store from the UI-React context
 	const store = useStore();
 
 	return () => {
@@ -212,6 +203,16 @@ export const getOverdueTodos = (store: Store): Record<string, Todo> => {
 		}
 		return filtered;
 	}, {} as Record<string, Todo>);
+};
+
+export const getTodoById = (id: string): Todo | null => {
+	const store = useStore();
+	if (!store) return null;
+
+	const todo = store.getRow(TODO_TABLE, id);
+	console.log('Todo from store:', todo);
+
+	return todo as Todo;
 };
 
 export const ClearTodos = () => {

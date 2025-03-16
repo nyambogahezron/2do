@@ -1,6 +1,6 @@
 import React from 'react';
 import * as SQLite from 'expo-sqlite';
-import { Platform, StatusBar } from 'react-native';
+import { Platform } from 'react-native';
 import { createStore, Store } from 'tinybase';
 import { createLocalPersister } from 'tinybase/persisters/persister-browser';
 import { createExpoSqlitePersister } from 'tinybase/persisters/persister-expo-sqlite';
@@ -13,12 +13,8 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TODO_TABLE, todoTableSchema, setupTodoTable } from '@/store/todo';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
-import TodosScreen from './todo';
-import SettingsScreen from './settings';
-import DrawerContent from './naviagtion/Drawer';
-import Notes from './notes';
-import ShoppingList from './shoppingList';
+import SCREENS from './navigation/screens';
+import DrawerContent from './navigation/Drawer';
 
 // Add global type definition for the store
 declare global {
@@ -93,22 +89,24 @@ export default function App() {
 					>
 						<Drawer.Screen
 							name='Home'
-							component={TodosScreen}
+							component={SCREENS.TodosScreen}
 							options={{ headerShown: false }}
 						/>
-						<Drawer.Screen name='Settings' component={SettingsScreen} />
-						<Drawer.Screen name='Notes' component={Notes} />
-						<Drawer.Screen name='ShoppingList' component={ShoppingList} />
+						<Drawer.Screen name='Notes' component={SCREENS.Notes} />
+						<Drawer.Screen
+							name='ShoppingList'
+							component={SCREENS.ShoppingList}
+						/>
+						<Drawer.Screen name='Theme' component={SCREENS.Theme} />
+						<Drawer.Screen name='Widget' component={SCREENS.Widget} />
+						<Drawer.Screen name='Donate' component={SCREENS.Donate} />
+						<Drawer.Screen name='Profile' component={SCREENS.Profile} />
+						<Drawer.Screen name='Settings' component={SCREENS.SettingsScreen} />
+
+						<Drawer.Screen name='EditTodo' component={SCREENS.EditTodoScreen} />
 					</Drawer.Navigator>
 				</Provider>
 			</GestureHandlerRootView>
 		</ThemeProvider>
 	);
 }
-
-export type RootStackParamList = {
-	Home: undefined;
-	Settings: undefined;
-	Notes: undefined;
-	ShoppingList: undefined;
-};

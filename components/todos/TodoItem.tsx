@@ -1,10 +1,11 @@
+import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { priorityColors } from '@/lib/utils';
-import { Circle, CircleCheckBig } from 'lucide-react-native';
+import { Bell, Circle, CircleCheckBig } from 'lucide-react-native';
 import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { useDeleteTodo, useTodo, useToggleTodoDone } from '@/store/todo';
 import SwipeableRow from '../ui/SwipeableRow';
-import React from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 interface TodoItemProps {
 	id: string;
@@ -16,6 +17,7 @@ export default function TodoItem({ id, onEdit }: TodoItemProps) {
 	const todoData = useTodo(id);
 
 	const { id: todoId, text, done, priority, dueDate } = todoData;
+	const navigation = useNavigation<any>();
 
 	const handlePress = useToggleTodoDone(id);
 	const handleDelete = useDeleteTodo(id);
@@ -51,9 +53,7 @@ export default function TodoItem({ id, onEdit }: TodoItemProps) {
 
 	// Handle edit when todo item is pressed
 	const handleEditPress = () => {
-		if (onEdit) {
-			onEdit(todoData);
-		}
+		navigation.navigate('EditTodo', { id: todoData.id });
 	};
 
 	return (
@@ -64,7 +64,7 @@ export default function TodoItem({ id, onEdit }: TodoItemProps) {
 					{done ? (
 						<CircleCheckBig style={[styles.icon, styles.doneIcon]} size={22} />
 					) : (
-						<Circle style={styles.icon} size={22} />
+						<Circle style={styles.icon} color={color} size={22} />
 					)}
 				</TouchableOpacity>
 
@@ -81,13 +81,8 @@ export default function TodoItem({ id, onEdit }: TodoItemProps) {
 					<View style={styles.action}>
 						{!done && showDueDate && (
 							<>
+								<Bell color={themeClrs.colors.textGrey} size={13} />
 								<Text style={styles.date}>{showDueDate}</Text>
-
-								<View style={styles.priorityWrapper}>
-									<View
-										style={[styles.priorityCircle, { backgroundColor: color }]}
-									/>
-								</View>
 							</>
 						)}
 					</View>
@@ -105,7 +100,7 @@ const createStyles = (themeClrs: any) =>
 			flexDirection: 'row',
 			width: '100%',
 			minHeight: 65,
-			backgroundColor: themeClrs.colors.surface,
+			backgroundColor: themeClrs.colors.card,
 			alignItems: 'center',
 			justifyContent: 'flex-start',
 			overflow: 'hidden',
@@ -117,7 +112,7 @@ const createStyles = (themeClrs: any) =>
 		icon: {
 			marginRight: 8,
 			marginLeft: 10,
-			color: themeClrs.colors.text,
+			color: themeClrs.colors.textGrey,
 		},
 
 		todo: {
@@ -132,28 +127,15 @@ const createStyles = (themeClrs: any) =>
 		action: {
 			display: 'flex',
 			flexDirection: 'row',
-			justifyContent: 'space-between',
+			marginTop: 8,
+			gap: 5,
+			justifyContent: 'flex-start',
 			alignItems: 'center',
 		},
 		date: {
-			marginTop: 8,
 			fontSize: 12,
-			color: themeClrs.colors.text,
+			color: themeClrs.colors.textMuted,
 		},
-		priorityWrapper: {
-			display: 'flex',
-			flexDirection: 'row',
-			alignItems: 'flex-end',
-			alignSelf: 'flex-end',
-		},
-		priorityCircle: {
-			width: 10,
-			height: 10,
-			borderRadius: 5,
-			backgroundColor: '#f00',
-			marginRight: 4,
-		},
-
 		done: {
 			textDecorationStyle: 'solid',
 			textDecorationLine: 'line-through',
@@ -167,5 +149,8 @@ const createStyles = (themeClrs: any) =>
 		todoText: {
 			fontSize: 18,
 			color: themeClrs.colors.text,
+			fontFamily: 'Inter_400Regular',
+			fontWeight: '400',
+			lineHeight: 24,
 		},
 	});

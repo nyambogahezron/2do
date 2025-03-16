@@ -18,16 +18,18 @@ import EmptyState from '@/components/ui/EmptyState';
 import TodoItem from '@/components/todos/TodoItem';
 import KeyboardTodoInput from '@/components/todos/KeyboardTodoInput';
 import { useSortedTodos } from '@/store/todo';
+import { useTheme as ThemeContext } from '@/context/ThemeContext';
 
 export default function TodosScreen() {
 	const [menuVisible, setMenuVisible] = React.useState(false);
 	const [keyboardInputVisible, setKeyboardInputVisible] = useState(false);
 	const theme = useTheme();
 	const inputRef = React.useRef<any>(null);
+	const { theme: currentTheme, themeClrs } = ThemeContext();
 
 	// Handle todo item click for editing
 	const handleTodoEdit = (todoId: string) => {
-		router.push(`/todo/edit?id=${todoId}`);
+		router.push(`/todo/?id=${todoId}`);
 	};
 
 	const renderItem = ({ item: id }: any) => (
@@ -84,7 +86,7 @@ export default function TodosScreen() {
 	return (
 		<SafeAreaProvider>
 			<StatusBar
-				style={theme.dark ? 'dark' : 'light'}
+				style={currentTheme === 'light' ? 'dark' : 'light'}
 				backgroundColor={theme.colors.background}
 			/>
 

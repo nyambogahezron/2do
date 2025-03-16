@@ -6,15 +6,15 @@ import MenuList from './Menu';
 import { useTheme } from '@/context/ThemeContext';
 
 type CustomHeaderProps = {
-	setMenuVisible: (visible: boolean) => void;
-	menuVisible: boolean;
+	setMenuVisible?: (visible: boolean) => void;
+	menuVisible?: boolean;
 	title?: string;
 	showMenu?: boolean;
 };
 
 export default function CustomHeader({
-	setMenuVisible,
-	menuVisible,
+	setMenuVisible = () => {},
+	menuVisible = false,
 	title = 'Todos',
 	showMenu = false,
 }: CustomHeaderProps) {
