@@ -9,7 +9,7 @@ import {
 	useSortedRowIds,
 } from 'tinybase/ui-react';
 import { useStore } from 'tinybase/ui-react';
-
+import React from 'react';
 // Schema constants
 export const TODO_TABLE = 'todo';
 export const ID_CELL = 'id';
@@ -54,8 +54,11 @@ export const addTodo = (
 	store: Store,
 	todoData: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>
 ): string => {
-	const id = Date.now().toString();
+	const id = Date.now().toString(); // Ensure ID is a string
 	const now = new Date().toISOString();
+
+	// Log the todo being added
+	console.log('Adding todo with ID:', id, todoData);
 
 	store.setRow(TODO_TABLE, id, {
 		id,
@@ -72,10 +75,22 @@ export const updateTodo = (
 	id: string,
 	updates: Partial<Omit<Todo, 'id' | 'createdAt'>>
 ): void => {
-	const todo = store.getRow(TODO_TABLE, id);
+	// Convert id to string to ensure consistent format
+	const stringId = String(id);
+	
+	console.log('Updating todo with ID:', stringId, updates);
+	
+	// Check if the store has this row
+	if (!store.hasRow(TODO_TABLE, stringId)) {
+		console.error('Cannot find todo with ID:', stringId);
+		console.log('Available IDs:', Object.keys(store.getTable(TODO_TABLE) || {}));
+		return;
+	}
+	
+	const todo = store.getRow(TODO_TABLE, stringId);
 	if (todo) {
 		const now = new Date().toISOString();
-		store.setPartialRow(TODO_TABLE, id, {
+		store.setPartialRow(TODO_TABLE, stringId, {
 			...updates,
 			updatedAt: now,
 		});
@@ -88,7 +103,11 @@ export const deleteTodo = (store: Store, id: string): void => {
 
 // React hooks for components
 export const useTodo = (id: string): Todo => {
-	return useRow(TODO_TABLE, id) as Todo;
+	// Use the built-in useRow hook which already handles subscriptions correctly
+	const row = useRow(TODO_TABLE, String(id));
+	
+	// Convert any non-object response to an empty object
+	return (row && typeof row === 'object') ? row as Todo : {} as Todo;
 };
 
 export const useAddTodo = () => {
@@ -220,3 +239,6 @@ export const ClearTodos = () => {
 
 	return useDelTableCallback(TODO_TABLE);
 };
+
+// Re-export useStore
+export { useStore } from 'tinybase/ui-react';

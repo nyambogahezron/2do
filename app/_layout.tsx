@@ -12,6 +12,13 @@ import {
 import { ThemeProvider } from '@/context/ThemeContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TODO_TABLE, todoTableSchema, setupTodoTable } from '@/store/todo';
+import { 
+	SHOPPING_LISTS_TABLE, 
+	SHOPPING_ITEMS_TABLE,
+	shoppingListsTableSchema, 
+	shoppingItemsTableSchema,
+	setupShoppingTables 
+} from '@/store/shopping';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import SCREENS from './navigation/screens';
 import DrawerContent from './navigation/Drawer';
@@ -31,9 +38,15 @@ export default function App() {
 	const store = useCreateStore(() => {
 		const newStore = createStore().setTablesSchema({
 			[TODO_TABLE]: todoTableSchema,
+			[SHOPPING_LISTS_TABLE]: shoppingListsTableSchema,
+			[SHOPPING_ITEMS_TABLE]: shoppingItemsTableSchema
 		});
+		
 		// Initialize the todo table
 		setupTodoTable(newStore);
+		
+		// Initialize shopping tables
+		setupShoppingTables(newStore);
 
 		// Make store globally accessible
 		if (typeof window !== 'undefined') {
