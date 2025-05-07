@@ -1,6 +1,6 @@
 import React from 'react';
 import * as SQLite from 'expo-sqlite';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { createStore, Store } from 'tinybase';
 import { createLocalPersister } from 'tinybase/persisters/persister-browser';
 import { createExpoSqlitePersister } from 'tinybase/persisters/persister-expo-sqlite';
@@ -77,49 +77,54 @@ export default function App() {
 	useAndStartPersister(store);
 
 	return (
-		<ThemeProvider>
-			<GestureHandlerRootView>
-				<Provider store={store}>
-					<Drawer.Navigator
-						screenOptions={{
-							headerShown: false,
-							drawerStyle: {
-								borderRadius: 0,
-								marginTop: 0,
-								borderBottomRightRadius: 0,
-								borderTopRightRadius: 0,
-								zIndex: 999,
-								backgroundColor: '#f4f4f4',
-							},
-							headerStyle: { backgroundColor: 'tomato' },
-							sceneStyle: { borderRadius: 0 },
-							drawerStatusBarAnimation: 'slide',
-							drawerActiveTintColor: 'yellow',
-							drawerInactiveTintColor: 'black',
-						}}
-						initialRouteName='Home'
-						drawerContent={(props) => <DrawerContent {...props} />}
-					>
-						<Drawer.Screen
-							name='Home'
-							component={SCREENS.TodosScreen}
-							options={{ headerShown: false }}
-						/>
-						<Drawer.Screen name='Notes' component={SCREENS.Notes} />
-						<Drawer.Screen
-							name='ShoppingList'
-							component={SCREENS.ShoppingList}
-						/>
-						<Drawer.Screen name='Theme' component={SCREENS.Theme} />
-						<Drawer.Screen name='Widget' component={SCREENS.Widget} />
-						<Drawer.Screen name='Donate' component={SCREENS.Donate} />
-						<Drawer.Screen name='Profile' component={SCREENS.Profile} />
-						<Drawer.Screen name='Settings' component={SCREENS.SettingsScreen} />
-
-						<Drawer.Screen name='EditTodo' component={SCREENS.EditTodoScreen} />
-					</Drawer.Navigator>
-				</Provider>
-			</GestureHandlerRootView>
-		</ThemeProvider>
+		<GestureHandlerRootView style={styles.container}>
+			<Provider store={store}>
+				<ThemeProvider>
+						<Drawer.Navigator
+							drawerContent={(props) => <DrawerContent {...props} />}
+							screenOptions={{
+								headerShown: false,
+								drawerStyle: {
+									borderRadius: 0,
+									marginTop: 0,
+									borderBottomRightRadius: 0,
+									borderTopRightRadius: 0,
+									zIndex: 999,
+									backgroundColor: '#f4f4f4',
+								},
+								headerStyle: { backgroundColor: 'tomato' },
+								sceneStyle: { borderRadius: 0 },
+								drawerStatusBarAnimation: 'slide',
+								drawerActiveTintColor: 'yellow',
+								drawerInactiveTintColor: 'black',
+							}}
+							initialRouteName='Home'
+						>
+							<Drawer.Screen
+								name='Home'
+								component={SCREENS.TodosScreen}
+								options={{ headerShown: false }}
+							/>
+							<Drawer.Screen name='Notes' component={SCREENS.Notes} />
+							<Drawer.Screen
+								name='ShoppingList'
+								component={SCREENS.ShoppingList}
+							/>
+							<Drawer.Screen name='Theme' component={SCREENS.Theme} />
+							<Drawer.Screen name='Widget' component={SCREENS.Widget} />
+							<Drawer.Screen name='Donate' component={SCREENS.Donate} />
+							<Drawer.Screen name='Profile' component={SCREENS.Profile} />
+							<Drawer.Screen name='Settings' component={SCREENS.SettingsScreen} />
+							<Drawer.Screen name='EditTodo' component={SCREENS.EditTodoScreen} />
+						</Drawer.Navigator>
+				</ThemeProvider>
+			</Provider>
+		</GestureHandlerRootView>
 	);
 }
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	},
+});
