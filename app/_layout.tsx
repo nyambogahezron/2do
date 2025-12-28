@@ -14,7 +14,7 @@ const Drawer = createDrawerNavigator();
 export default function App() {
 	const [dbInitialized, setDbInitialized] = useState(false);
 
-	// Initialize Prisma database
+	// Initialize Drizzle database
 	useEffect(() => {
 		const initDb = async () => {
 			try {

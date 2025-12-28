@@ -78,10 +78,11 @@ export default function LoginScreen() {
       await signIn(email, password);
       buttonScale.value = withSpring(1);
       router.replace('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       buttonScale.value = withSpring(1);
       setLoading(false);
-      Alert.alert('Login Failed', error.message || 'Invalid email or password');
+      const errorMessage = error instanceof Error ? error.message : 'Invalid email or password';
+      Alert.alert('Login Failed', errorMessage);
     }
   };
 

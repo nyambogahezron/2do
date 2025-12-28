@@ -24,10 +24,10 @@ const NoteItem: React.FC = () => {
 	const params = useLocalSearchParams<{ id: string }>();
 	const id = params.id || (useRoute<any>().params?.id as string);
 
-	const note = useNote(id);
-	const deleteNote = useDeleteNote();
+	const { note, loading: noteLoading } = useNote(id);
+	const { deleteNote } = useDeleteNote();
 	const [isEditing, setIsEditing] = useState(false);
-	const loading = !note && id;
+	const loading = noteLoading && id;
 	const error = !note && id ? new Error('Note not found') : null;
 
 	const handleDelete = () => {
@@ -132,15 +132,18 @@ const NoteItem: React.FC = () => {
 				</View>
 			</View>
 
-			{note.tags && note.tags.length > 0 && (
-				<View style={styles.tagsContainer}>
-					{note.tags.map((tag, index) => (
-						<Chip key={index} style={styles.tag}>
-							{tag}
-						</Chip>
-					))}
-				</View>
-			)}
+			{note.tags && (() => {
+				const parsedTags = typeof note.tags === 'string' ? JSON.parse(note.tags) : note.tags;
+				return parsedTags.length > 0 ? (
+					<View style={styles.tagsContainer}>
+						{parsedTags.map((tag: string, index: number) => (
+							<Chip key={index} style={styles.tag}>
+								{tag}
+							</Chip>
+						))}
+					</View>
+				) : null;
+			})()}
 
 			<Divider style={styles.divider} />
 

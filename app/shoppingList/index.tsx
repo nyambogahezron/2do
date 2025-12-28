@@ -61,7 +61,7 @@ export default function ShoppingList() {
 	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
 
-	// Get shopping lists using Prisma
+	// Get shopping lists using Drizzle
 	const { lists: shoppingListsData, loading: listsLoading, refresh: refreshLists } = useShoppingLists();
 	
 	// Get shopping items for selected list

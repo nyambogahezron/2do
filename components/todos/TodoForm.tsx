@@ -22,7 +22,7 @@ type TodoFormProps = {
 
 export default function TodoForm({ initialData, onCancel, isEditing = true }: TodoFormProps) {
 	const { themeClrs } = useTheme();
-	const updateTodo = useUpdateTodo();
+	const { updateTodo } = useUpdateTodo();
 
 	// Initialize form with existing todo data
 	const [title, setTitle] = useState(initialData.text || '');
@@ -44,9 +44,9 @@ export default function TodoForm({ initialData, onCancel, isEditing = true }: To
 			return;
 		}
 
-		// Update the todo using Prisma
+		// Update the todo using Drizzle
 		try {
-			await updateTodo(initialData.id, {
+			await updateTodo.updateTodo(initialData.id, {
 				text: title,
 				done: done,
 				priority: priority,
@@ -60,7 +60,7 @@ export default function TodoForm({ initialData, onCancel, isEditing = true }: To
 		}
 	};
 
-	const handleDateChange = (event: any, selectedDate?: Date) => {
+	const handleDateChange = (event: unknown, selectedDate?: Date) => {
 		setShowDatePicker(false);
 		if (selectedDate) {
 			setDueDate(selectedDate);

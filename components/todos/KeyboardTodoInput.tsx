@@ -28,7 +28,7 @@ const KeyboardTodoInput = ({ visible, onClose, inputRef }: KeyboardTodoInputProp
   const theme = useTheme();
   const generateId = useGenerateId();
   
-  const addTodo = useAddTodo();
+  const { addTodo } = useAddTodo();
   
   // Set up animation when priority modal becomes visible
   useEffect(() => {
@@ -134,7 +134,7 @@ const KeyboardTodoInput = ({ visible, onClose, inputRef }: KeyboardTodoInputProp
     }
   };
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
+  const handleDateChange = (event: unknown, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
       if (dueDate) {
@@ -147,7 +147,7 @@ const KeyboardTodoInput = ({ visible, onClose, inputRef }: KeyboardTodoInputProp
     }
   };
 
-  const handleTimeChange = (event: any, selectedTime?: Date) => {
+  const handleTimeChange = (event: unknown, selectedTime?: Date) => {
     setShowTimePicker(false);
     if (selectedTime) {
       const newDate = dueDate ? new Date(dueDate) : new Date();

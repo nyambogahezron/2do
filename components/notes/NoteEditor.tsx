@@ -28,7 +28,7 @@ import { useAddNote, useUpdateNote } from '../../store/notes';
 
 interface NoteEditorProps {
 	note?: Note;
-	onSave?: (formData?: any) => void;
+	onSave?: (formData?: Partial<Note>) => void;
 }
 
 const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave }) => {
@@ -43,7 +43,9 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave }) => {
 	// Form state
 	const [title, setTitle] = useState(note?.title || '');
 	const [content, setContent] = useState(note?.content || '');
-	const [tags, setTags] = useState<string[]>(note?.tags || []);
+	const [tags, setTags] = useState<string[]>(
+		note?.tags ? (typeof note.tags === 'string' ? JSON.parse(note.tags) : note.tags) : []
+	);
 	const [newTag, setNewTag] = useState('');
 	const [showTagDialog, setShowTagDialog] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,14 +64,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave }) => {
 				await updateNote(note.id, {
 					title,
 					content,
-					tags,
+					tags: JSON.stringify(tags),
 				});
 			} else {
 				// Create new note
 				await addNote({
 					title,
 					content,
-					tags,
+					tags: JSON.stringify(tags),
 				});
 			}
 

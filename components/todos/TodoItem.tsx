@@ -3,23 +3,24 @@ import { useTheme } from '@/context/ThemeContext';
 import { priorityColors } from '@/lib/utils';
 import { Bell, Circle, CircleCheckBig } from 'lucide-react-native';
 import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
-import { useDeleteTodo, useTodo, useToggleTodoDone } from '@/store/todo';
+import { useDeleteTodo, useTodo, useToggleTodoDone, type Todo } from '@/store/todo';
 import SwipeableRow from '../ui/SwipeableRow';
 import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
 
 interface TodoItemProps {
 	id: string;
-	onEdit?: (todoData: any) => void;
+	onEdit?: (todoData: Todo) => void;
 }
 
 export default function TodoItem({ id, onEdit }: TodoItemProps) {
 	const { themeClrs } = useTheme();
-	const todoData = useTodo(id);
+	const { todo: todoData, loading } = useTodo(id);
 
-	const navigation = useNavigation<any>();
+	const navigation = useNavigation<NavigationProp<any>>();
 	
 	const toggleTodoDone = useToggleTodoDone(id);
-	const deleteTodo = useDeleteTodo();
+	const { deleteTodo } = useDeleteTodo();
 	
 	const handlePress = async () => {
 		if (todoData) {
@@ -28,14 +29,17 @@ export default function TodoItem({ id, onEdit }: TodoItemProps) {
 	};
 	
 	const handleDelete = async () => {
-		await deleteTodo(id);
+		if (id) {
+			await deleteTodo(id);
+		}
 	};
 	
-	if (!todoData) {
+	// Don't render anything while loading or if no data
+	if (loading || !todoData) {
 		return null;
 	}
 	
-	const { id: todoId, text, done, priority, dueDate } = todoData;
+	const { text, done, priority, dueDate } = todoData;
 	const color = priorityColors[priority as 'low' | 'medium' | 'high'];
 
 	//show due date month/day when curren year is same as due date year
@@ -107,7 +111,7 @@ export default function TodoItem({ id, onEdit }: TodoItemProps) {
 	);
 }
 
-const createStyles = (themeClrs: any) =>
+const createStyles = (themeClrs: ReturnType<typeof useTheme>['themeClrs']) =>
 	StyleSheet.create({
 		container: {
 			flex: 1,

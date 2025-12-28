@@ -26,9 +26,9 @@ export default function EditTodoScreen() {
 	// Get the todo ID from route params
 	const todoId = routeParams?.id ? String(routeParams.id) : '';
 	
-	// Use the todo data with Prisma
-	const todoData = useTodo(todoId);
-	const updateTodo = useUpdateTodo();
+	// Use the todo data with Drizzle
+	const { todo: todoData } = useTodo(todoId);
+	const { updateTodo } = useUpdateTodo();
 	
 	// State for form fields
 	const [text, setText] = useState('');
@@ -127,7 +127,7 @@ export default function EditTodoScreen() {
 	};
 	
 	// Date and time picker handlers
-	const handleDateChange = (_event: any, selectedDate?: Date) => {
+	const handleDateChange = (_event: unknown, selectedDate?: Date) => {
 		setShowDatePicker(false);
 		if (selectedDate) {
 			if (dueDate) {
@@ -141,7 +141,7 @@ export default function EditTodoScreen() {
 		}
 	};
 	
-	const handleTimeChange = (_event: any, selectedTime?: Date) => {
+	const handleTimeChange = (_event: unknown, selectedTime?: Date) => {
 		setShowTimePicker(false);
 		if (selectedTime) {
 			// Create a new date or use existing one

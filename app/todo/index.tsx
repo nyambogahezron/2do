@@ -28,11 +28,11 @@ export default function TodosScreen() {
 	const { themeName: currentTheme, themeClrs } = ThemeContext();
 
 	// Handle todo item click for editing
-	const handleTodoEdit = (todoId: string) => {
-		router.push(`/todo/?id=${todoId}`);
+	const handleTodoEdit = (todoData: any) => {
+		router.push(`/todo/edit?id=${todoData.id}`);
 	};
 
-	const renderItem = ({ item: id }: any) => (
+	const renderItem = ({ item: id }: { item: string }) => (
 		<TodoItem id={id} onEdit={handleTodoEdit} />
 	);
 
@@ -80,7 +80,7 @@ export default function TodosScreen() {
 		setKeyboardInputVisible(true);
 	};
 
-	// Get todos using Prisma
+	// Get todos using Drizzle
 	const { todos, loading, refresh } = useTodos();
 	
 	// Refresh todos when component mounts or when needed

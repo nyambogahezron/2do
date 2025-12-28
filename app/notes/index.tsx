@@ -28,7 +28,7 @@ export default function NotesScreen() {
 	const theme = useTheme();
 	const { themeName: currentTheme, themeClrs } = ThemeContext();
 
-	// Get all notes using Prisma
+	// Get all notes using Drizzle
 	const { notes: allNotes, loading, refresh } = useNotes();
 	
 	// Refresh notes when component mounts

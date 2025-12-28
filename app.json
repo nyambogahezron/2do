@@ -15,18 +15,17 @@
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE",
-        "POST_NOTIFICATIONS"
-      ],
-      "googleServicesFile": "./google-services.json",
-      "package": "com.nyambogahezron.todo"
-    },
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#ffffff"
+			},
+			"permissions": [
+				"RECEIVE_BOOT_COMPLETED",
+				"VIBRATE",
+				"POST_NOTIFICATIONS"
+			],
+			"package": "com.nyambogahezron.todo"
+		},
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"

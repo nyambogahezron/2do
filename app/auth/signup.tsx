@@ -90,10 +90,11 @@ export default function SignUpScreen() {
       await signUp(email, password, name);
       buttonScale.value = withSpring(1);
       router.replace('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       buttonScale.value = withSpring(1);
       setLoading(false);
-      Alert.alert('Sign Up Failed', error.message || 'Failed to create account');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create account';
+      Alert.alert('Sign Up Failed', errorMessage);
     }
   };
 
