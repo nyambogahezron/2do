@@ -5,12 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+	handleNotification: async () => ({
+		shouldShowAlert: true,
+		shouldPlaySound: true,
+		shouldSetBadge: true,
+		shouldShowBanner: true,
+		shouldShowList: true,
+	}),
+})
 
 export interface NotificationPermissions {
   status: 'granted' | 'denied' | 'undetermined';
@@ -86,16 +88,17 @@ export async function scheduleTodoNotification(
   todoId: string
 ): Promise<string> {
   const notificationId = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: '📝 Todo Reminder',
-      body: `${todoTitle}${todoDescription ? ': ' + todoDescription : ''}`,
-      data: { todoId, type: 'todo_reminder' },
-      sound: true,
-    },
-    trigger: {
-      date: dueDate,
-    },
-  });
+		content: {
+			title: '📝 Todo Reminder',
+			body: `${todoTitle}${todoDescription ? ': ' + todoDescription : ''}`,
+			data: { todoId, type: 'todo_reminder' },
+			sound: true,
+		},
+		trigger: {
+			type: Notifications.SchedulableTriggerInputTypes.DATE,
+			date: dueDate,
+		},
+	})
 
   return notificationId;
 }
@@ -178,7 +181,7 @@ export function setupNotificationListeners(
 
   // Return cleanup function
   return () => {
-    Notifications.removeNotificationSubscription(receivedListener);
-    Notifications.removeNotificationSubscription(responseListener);
+    receivedListener.remove()
+		responseListener.remove()
   };
 }

@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native'
 import { Modal, IconButton, Text } from 'react-native-paper';
-import TodoForm from './TodoForm';
-import { View } from 'react-native';
+import TodoForm from './TodoForm'
 import { useTheme } from '@/context/ThemeContext';
 import { Todo } from '@/store/todo';
 
@@ -18,77 +17,69 @@ export default function EditTodoModel({ visible, setVisible, todoData }: EditTod
 
 	return (
 		<Modal
-			style={styles.modal}
 			visible={visible}
 			onDismiss={hideModal}
 			contentContainerStyle={[
 				styles.containerStyle,
-				{ backgroundColor: themeClrs.colors.card },
+				{ backgroundColor: themeClrs.colors.surface },
 			]}
+			style={styles.modal}
 		>
-			{/* Header with title and close button */}
-			<View style={styles.header}>
-				<Text style={[styles.title, { color: themeClrs.colors.text }]}>
-					Edit Todo
-				</Text>
-				<IconButton
-					style={styles.closeButton}
-					icon='close'
-					onPress={hideModal}
+			<View style={styles.sheetContent}>
+				{/* Header with title and close button */}
+				<View style={styles.header}>
+					<Text style={[styles.title, { color: themeClrs.colors.text }]}>
+						Edit Task
+					</Text>
+					<IconButton
+						icon='close'
+						iconColor={themeClrs.colors.textMuted}
+						size={20}
+						onPress={hideModal}
+						style={styles.closeButton}
+					/>
+				</View>
+
+				{/* Todo form in update mode */}
+				<TodoForm
+					initialData={todoData}
+					onCancel={hideModal}
+					isEditing={true}
 				/>
 			</View>
-			
-			{/* Todo form in update mode */}
-			<TodoForm 
-				initialData={todoData}
-				onCancel={hideModal} 
-				isEditing={true}
-			/>
 		</Modal>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
 	modal: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-		width: '100%',
-		padding: 20,
+		justifyContent: 'flex-end',
+		margin: 0,
 	},
 	containerStyle: {
-		justifyContent: 'center',
-		alignItems: 'center',
 		backgroundColor: 'white',
-		padding: 15,
-		top: -20,
+		borderTopLeftRadius: 24,
+		borderTopRightRadius: 24,
+		paddingHorizontal: 20,
+		paddingTop: 20,
+		paddingBottom: 40, // Extra padding for bottom safe area
 		width: '100%',
-		borderRadius: 10,
+	},
+	sheetContent: {
+		width: '100%',
 	},
 	header: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'space-between',
-		width: '100%',
-		marginBottom: 10,
+		marginBottom: 20,
 	},
 	title: {
-		fontSize: 20,
+		fontSize: 22,
 		fontWeight: 'bold',
-		marginLeft: 10,
-	},
-	closeView: {
-		display: 'flex',
-		alignItems: 'flex-end',
-		width: '100%',
+		letterSpacing: 0.5,
 	},
 	closeButton: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		width: 40,
-		height: 40,
-		borderRadius: 25,
+		margin: 0,
 	},
-}); 
+}) 

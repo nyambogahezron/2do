@@ -88,9 +88,11 @@ export default function TodosScreen() {
 		refresh();
 	}, [refresh]);
 	
-	// Convert todos to IDs for compatibility with existing renderItem
+	// Convert todos to IDs for compatibility with existing renderItem - filter valid todos
 	const sortedTodoIds = React.useMemo(() => {
-		return todos.map(todo => todo.id);
+		return todos
+			.filter(todo => todo && todo.id)
+			.map(todo => todo.id);
 	}, [todos]);
 
 	return (

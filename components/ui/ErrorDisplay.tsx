@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Button, Icon } from 'react-native-paper';
-import { ErrorDisplayProps } from '../../types';
+
+interface ErrorDisplayProps {
+  error: Error;
+  retry?: () => void;
+}
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, retry }) => {
   return (

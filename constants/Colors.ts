@@ -1,44 +1,50 @@
 import { DefaultTheme } from 'react-native-paper';
 
-// Light Theme (Default)
+// Light Theme (Premium Slate)
 export const lightTheme = {
 	...DefaultTheme,
 	colors: {
 		...DefaultTheme.colors,
-		primary: '#3498db',
-		accent: '#f1c40f',
-		background: '#ffffff',
-		surface: '#f2f2f2',
-		text: '#000000',
-		textMuted: '#808080',
-		textGrey: '#696f71',
-		onSurfaceVariant: '#000000',
-		border: '#f2f2f2',
-		notification: '#3498db',
-		card: '#f4f9fc',
-		secondary: '#3498db',
+		primary: '#2563EB', // vibrant blue
+		accent: '#F59E0B',
+		background: '#F8FAFC', // slate-50
+		surface: '#FFFFFF',
+		text: '#0F172A', // slate-900
+		textMuted: '#64748B', // slate-500
+		textGrey: '#475569', // slate-600
+		onSurfaceVariant: '#334155', // slate-700
+		border: '#E2E8F0', // slate-200
+		notification: '#2563EB',
+		card: '#FFFFFF',
+		secondary: '#3B82F6',
+		elevation: {
+			level1: 'rgba(0,0,0,0.05)',
+		},
 	},
-};
+}
 
-// Dark Theme
+// Dark Theme (Premium Dark Slate)
 export const darkTheme = {
 	...DefaultTheme,
 	colors: {
 		...DefaultTheme.colors,
-		primary: '#3498db',
-		accent: '#f1c40f',
-		background: '#000000',
-		surface: '#121212',
-		text: '#ffffff',
-		textMuted: '#333333',
-		textGrey: '#808080',
-		onSurfaceVariant: '#ffffff',
-		border: '#121212',
-		notification: '#3498db',
-		card: '#121212',
-		secondary: '#3498db',
+		primary: '#3B82F6', // lighter blue for dark mode
+		accent: '#FBBF24',
+		background: '#0F172A', // slate-900
+		surface: '#1E293B', // slate-800
+		text: '#F1F5F9', // slate-100
+		textMuted: '#94A3B8', // slate-400
+		textGrey: '#CBD5E1', // slate-300
+		onSurfaceVariant: '#E2E8F0', // slate-200
+		border: '#334155', // slate-700
+		notification: '#3B82F6',
+		card: '#1E293B',
+		secondary: '#60A5FA',
+		elevation: {
+			level1: 'rgba(255,255,255,0.05)',
+		},
 	},
-};
+}
 
 // Blue Theme
 export const blueTheme = {

@@ -2,27 +2,27 @@ import { Todo, ShoppingItem, Note } from '../store/models';
 
 // Validator for Todo items
 export const validateTodoForm = (data: Partial<Todo>): { [key: string]: string } => {
-  const errors: { [key: string]: string } = {};
+	const errors: { [key: string]: string } = {}
 
-  // Title is required
-  if (!data.title || data.title.trim() === '') {
-    errors.title = 'Title is required';
-  }
+	// Text is required
+	if (!data.text || data.text.trim() === '') {
+		errors.text = 'Text is required'
+	}
 
-  // If priority is provided, validate it
-  if (data.priority && !['low', 'medium', 'high'].includes(data.priority)) {
-    errors.priority = 'Invalid priority level';
-  }
+	// If priority is provided, validate it
+	if (data.priority && !['low', 'medium', 'high'].includes(data.priority)) {
+		errors.priority = 'Invalid priority level'
+	}
 
-  // Validate dueDate is a future date if provided
-  if (data.dueDate) {
-    const dueDate = new Date(data.dueDate);
-    if (isNaN(dueDate.getTime())) {
-      errors.dueDate = 'Invalid date format';
-    }
-  }
+	// Validate dueDate is a future date if provided
+	if (data.dueDate) {
+		const dueDate = new Date(data.dueDate)
+		if (isNaN(dueDate.getTime())) {
+			errors.dueDate = 'Invalid date format'
+		}
+	}
 
-  return errors;
+	return errors
 };
 
 // Validator for Shopping items
@@ -81,21 +81,6 @@ export const validateNoteForm = (data: Partial<Note>): { [key: string]: string }
     errors.content = 'Content is required';
   }
 
-  // Validate image URLs if provided
-  if (data.images && Array.isArray(data.images)) {
-    if (data.images.some(img => typeof img !== 'string' || img.trim() === '')) {
-      errors.images = 'All image URLs must be valid strings';
-    }
-  }
-
-  // Validate links if provided
-  if (data.links && Array.isArray(data.links)) {
-    try {
-      data.links.forEach(link => new URL(link));
-    } catch (error) {
-      errors.links = 'All links must be valid URLs';
-    }
-  }
 
   return errors;
 };

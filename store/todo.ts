@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq,  desc } from 'drizzle-orm';
 import { randomUUID } from 'expo-crypto';
-import { getDb } from '@/lib/db';
 import { todos, Todo, InsertTodo } from '@/db/schema';
+import { db } from '@/db/connect';
 
-// Re-export types for convenience
 export type { Todo, InsertTodo } from '@/db/schema';
 
-/**
- * Get all todos from the database
- */
 export const getAllTodos = async (): Promise<Todo[]> => {
-  const db = getDb();
   try {
     const allTodos = await db.select()
       .from(todos)
@@ -23,11 +18,7 @@ export const getAllTodos = async (): Promise<Todo[]> => {
   }
 };
 
-/**
- * Get a single todo by ID
- */
 export const getTodoById = async (id: string): Promise<Todo | null> => {
-  const db = getDb();
   try {
     const result = await db.select()
       .from(todos)
@@ -40,13 +31,9 @@ export const getTodoById = async (id: string): Promise<Todo | null> => {
   }
 };
 
-/**
- * Add a new todo
- */
 export const addTodo = async (
   todoData: Omit<InsertTodo, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<string> => {
-  const db = getDb();
   const now = new Date().toISOString();
   const id = randomUUID();
 
@@ -67,14 +54,10 @@ export const addTodo = async (
   }
 };
 
-/**
- * Update an existing todo
- */
 export const updateTodo = async (
   id: string,
   updates: Partial<Omit<Todo, 'id' | 'createdAt'>>
 ): Promise<void> => {
-  const db = getDb();
   const now = new Date().toISOString();
 
   try {
@@ -90,11 +73,7 @@ export const updateTodo = async (
   }
 };
 
-/**
- * Toggle todo completion status
- */
 export const toggleTodo = async (id: string): Promise<void> => {
-  const db = getDb();
   try {
     const todo = await getTodoById(id);
     if (todo) {
@@ -106,11 +85,7 @@ export const toggleTodo = async (id: string): Promise<void> => {
   }
 };
 
-/**
- * Delete a todo
- */
 export const deleteTodo = async (id: string): Promise<void> => {
-  const db = getDb();
   try {
     await db.delete(todos)
       .where(eq(todos.id, id));
@@ -120,9 +95,6 @@ export const deleteTodo = async (id: string): Promise<void> => {
   }
 };
 
-/**
- * React hook to get all todos
- */
 export const useTodos = () => {
   const [todosList, setTodosList] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,9 +122,6 @@ export const useTodos = () => {
   };
 };
 
-/**
- * React hook to get a single todo by ID
- */
 export const useTodo = (id: string | null) => {
   const [todo, setTodo] = useState<Todo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -186,9 +155,6 @@ export const useTodo = (id: string | null) => {
   };
 };
 
-/**
- * React hook for deleting a todo
- */
 export const useDeleteTodo = () => {
   const [deleting, setDeleting] = useState(false);
 
@@ -210,9 +176,6 @@ export const useDeleteTodo = () => {
   };
 };
 
-/**
- * React hook for adding a todo
- */
 export const useAddTodo = () => {
   const [adding, setAdding] = useState(false);
 
@@ -235,9 +198,6 @@ export const useAddTodo = () => {
   };
 };
 
-/**
- * React hook for updating a todo
- */
 export const useUpdateTodo = () => {
   const [updating, setUpdating] = useState(false);
 
@@ -259,9 +219,6 @@ export const useUpdateTodo = () => {
   };
 };
 
-/**
- * React hook for toggling todo done status
- */
 export const useToggleTodoDone = (id: string) => {
   const [toggling, setToggling] = useState(false);
 

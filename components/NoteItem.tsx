@@ -16,9 +16,8 @@ type NoteItemProps = {
 export default function NoteItem({ note, category, onPress, onDelete }: NoteItemProps) {
   const theme = useTheme();
   
-  // Calculate if the note has links or images
-  const hasLinks = note.links && note.links.length > 0;
-  const hasImages = note.images && note.images.length > 0;
+  // Parse tags if they exist
+  const tags = note.tags ? JSON.parse(note.tags) : [];
 
   return (
     <Surface style={[
@@ -37,7 +36,7 @@ export default function NoteItem({ note, category, onPress, onDelete }: NoteItem
             {note.title}
           </Text>
           <Text style={styles.date}>
-            {formatDate(new Date(note.updatedAt))}
+            {formatDate(note.updatedAt)}
           </Text>
         </View>
         
@@ -67,26 +66,6 @@ export default function NoteItem({ note, category, onPress, onDelete }: NoteItem
               </Text>
             </View>
           )}
-          
-          <View style={styles.attachmentsContainer}>
-            {hasImages && (
-              <View style={styles.attachment}>
-                <Feather name="image" size={14} color={theme.colors.text} />
-                <Text style={styles.attachmentText}>
-                  {note.images?.length}
-                </Text>
-              </View>
-            )}
-            
-            {hasLinks && (
-              <View style={styles.attachment}>
-                <Feather name="link" size={14} color={theme.colors.text} />
-                <Text style={styles.attachmentText}>
-                  {note.links?.length}
-                </Text>
-              </View>
-            )}
-          </View>
         </View>
       </TouchableOpacity>
       

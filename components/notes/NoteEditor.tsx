@@ -35,8 +35,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave }) => {
 	const navigation = useNavigation();
 	const theme = useTheme();
 	const isEditing = !!note;
-	const addNote = useAddNote();
-	const updateNote = useUpdateNote();
+	const { addNote: addNoteMethod } = useAddNote();
+	const { updateNote: updateNoteMethod } = useUpdateNote();
 
 	const richText = React.useRef<RichEditor>(null);
 
@@ -61,14 +61,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave }) => {
 
 			if (isEditing && note) {
 				// Update existing note
-				await updateNote(note.id, {
+				await updateNoteMethod(note.id, {
 					title,
 					content,
 					tags: JSON.stringify(tags),
 				});
 			} else {
 				// Create new note
-				await addNote({
+				await addNoteMethod({
 					title,
 					content,
 					tags: JSON.stringify(tags),
@@ -79,7 +79,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave }) => {
 				onSave({
 					title,
 					content,
-					tags,
+					tags: JSON.stringify(tags),
 				});
 			} else {
 				navigation.goBack();
@@ -192,7 +192,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave }) => {
 								onSave({
 									title,
 									content,
-									tags,
+									tags: JSON.stringify(tags),
 								});
 							} else {
 								navigation.goBack();

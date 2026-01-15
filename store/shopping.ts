@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { eq, desc } from 'drizzle-orm';
 import { randomUUID } from 'expo-crypto';
-import { getDb } from '@/lib/db';
 import {
   shoppingLists,
   shoppingItems,
@@ -10,12 +9,9 @@ import {
   InsertShoppingList,
   InsertShoppingItem,
 } from '@/db/schema';
+import { db } from '@/db/connect';
 
-/**
- * Get all shopping lists from the database
- */
 export const getAllShoppingLists = async (): Promise<ShoppingList[]> => {
-  const db = getDb();
   try {
     const lists = await db.select()
       .from(shoppingLists)
@@ -27,11 +23,7 @@ export const getAllShoppingLists = async (): Promise<ShoppingList[]> => {
   }
 };
 
-/**
- * Get a single shopping list by ID
- */
 export const getShoppingListById = async (id: string): Promise<ShoppingList | null> => {
-  const db = getDb();
   try {
     const result = await db.select()
       .from(shoppingLists)
@@ -44,11 +36,7 @@ export const getShoppingListById = async (id: string): Promise<ShoppingList | nu
   }
 };
 
-/**
- * Get all items for a shopping list
- */
 export const getShoppingItems = async (listId: string): Promise<ShoppingItem[]> => {
-  const db = getDb();
   try {
     const items = await db.select()
       .from(shoppingItems)
@@ -60,13 +48,9 @@ export const getShoppingItems = async (listId: string): Promise<ShoppingItem[]> 
   }
 };
 
-/**
- * Add a new shopping list
- */
 export const addShoppingList = async (
   listData: Omit<InsertShoppingList, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<string> => {
-  const db = getDb();
   const now = Date.now();
   const id = randomUUID();
 
@@ -84,14 +68,10 @@ export const addShoppingList = async (
   }
 };
 
-/**
- * Update an existing shopping list
- */
 export const updateShoppingList = async (
   id: string,
   updates: Partial<Omit<ShoppingList, 'id' | 'createdAt'>>
 ): Promise<void> => {
-  const db = getDb();
   const now = Date.now();
 
   try {
@@ -107,11 +87,7 @@ export const updateShoppingList = async (
   }
 };
 
-/**
- * Delete a shopping list (cascade deletes items)
- */
 export const deleteShoppingList = async (id: string): Promise<void> => {
-  const db = getDb();
   try {
     await db.delete(shoppingLists)
       .where(eq(shoppingLists.id, id));
@@ -121,13 +97,9 @@ export const deleteShoppingList = async (id: string): Promise<void> => {
   }
 };
 
-/**
- * Add an item to a shopping list
- */
 export const addShoppingItem = async (
   itemData: Omit<InsertShoppingItem, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<string> => {
-  const db = getDb();
   const now = Date.now();
   const id = randomUUID();
 
@@ -149,14 +121,10 @@ export const addShoppingItem = async (
   }
 };
 
-/**
- * Update an existing shopping item
- */
 export const updateShoppingItem = async (
   id: string,
   updates: Partial<Omit<ShoppingItem, 'id' | 'createdAt'>>
 ): Promise<void> => {
-  const db = getDb();
   const now = Date.now();
 
   try {
@@ -172,11 +140,7 @@ export const updateShoppingItem = async (
   }
 };
 
-/**
- * Toggle shopping item checked status
- */
 export const toggleShoppingItem = async (id: string): Promise<void> => {
-  const db = getDb();
   try {
     const result = await db.select()
       .from(shoppingItems)
@@ -193,11 +157,7 @@ export const toggleShoppingItem = async (id: string): Promise<void> => {
   }
 };
 
-/**
- * Delete a shopping item
- */
 export const deleteShoppingItem = async (id: string): Promise<void> => {
-  const db = getDb();
   try {
     await db.delete(shoppingItems)
       .where(eq(shoppingItems.id, id));
@@ -207,9 +167,6 @@ export const deleteShoppingItem = async (id: string): Promise<void> => {
   }
 };
 
-/**
- * React hook to get all shopping lists
- */
 export const useShoppingLists = () => {
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
@@ -237,9 +194,6 @@ export const useShoppingLists = () => {
   };
 };
 
-/**
- * React hook to get a single shopping list with its items
- */
 export const useShoppingList = (id: string | null) => {
   const [list, setList] = useState<ShoppingList | null>(null);
   const [items, setItems] = useState<ShoppingItem[]>([]);
@@ -280,9 +234,6 @@ export const useShoppingList = (id: string | null) => {
   };
 };
 
-/**
- * React hook to get shopping items for a list
- */
 export const useShoppingItems = (listId: string | null) => {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -316,22 +267,13 @@ export const useShoppingItems = (listId: string | null) => {
   };
 };
 
-/**
- * Helper function aliases for backwards compatibility
- */
 export const createShoppingList = addShoppingList;
 export const createShoppingItem = addShoppingItem;
 
-/**
- * Get total number of items in a shopping list
- */
 export const getTotalItems = (items: ShoppingItem[]): number => {
   return items.length;
 };
 
-/**
- * Get total price of items in a shopping list
- */
 export const getTotalPrice = (items: ShoppingItem[]): number => {
   return items.reduce((total, item) => total + (item.price * item.quantity), 0);
 };

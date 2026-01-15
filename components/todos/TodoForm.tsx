@@ -11,61 +11,76 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { validateTodoForm } from '@/utils/validation';
 import { Todo } from '@/store/models';
-import { useUpdateTodo } from '@/store/todo';
+import { useAddTodo, useUpdateTodo } from '@/store/todo'
 import { useTheme } from '@/context/ThemeContext';
 
 type TodoFormProps = {
-	initialData: Todo; 
-	onCancel: () => void;
-	isEditing?: boolean;
-};
+	initialData?: Todo
+	onCancel: () => void
+	isEditing?: boolean
+}
 
-export default function TodoForm({ initialData, onCancel, isEditing = true }: TodoFormProps) {
-	const { themeClrs } = useTheme();
-	const { updateTodo } = useUpdateTodo();
+export default function TodoForm({
+	initialData = {} as Todo,
+	onCancel,
+	isEditing = true,
+}: TodoFormProps) {
+	const { themeClrs } = useTheme()
+	const { updateTodo } = useUpdateTodo()
+	const { addTodo } = useAddTodo()
 
-	// Initialize form with existing todo data
-	const [title, setTitle] = useState(initialData.text || '');
+	// Initialize form with existing todo data or defaults
+	const [title, setTitle] = useState(initialData.text || '')
 	const [priority, setPriority] = useState<Todo['priority']>(
 		initialData.priority || 'medium'
-	);
+	)
 	const [dueDate, setDueDate] = useState<Date | null>(
 		initialData.dueDate ? new Date(initialData.dueDate) : null
-	);
-	const [done, setDone] = useState(initialData.done || false);
-	const [showDatePicker, setShowDatePicker] = useState(false);
-	const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+	)
+	const [done, setDone] = useState(initialData.done || false)
+	const [showDatePicker, setShowDatePicker] = useState(false)
+	const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
 
 	const handleSubmit = async () => {
-		const errors = validateTodoForm({ title });
+		const errors = validateTodoForm({ text: title })
 
 		if (Object.keys(errors).length > 0) {
-			setFormErrors(errors);
-			return;
+			setFormErrors(errors)
+			return
 		}
 
-		// Update the todo using Drizzle
 		try {
-			await updateTodo.updateTodo(initialData.id, {
-				text: title,
-				done: done,
-				priority: priority,
-				dueDate: dueDate?.toISOString() || '',
-			});
+			if (isEditing && initialData.id) {
+				// Update existing todo
+				await updateTodo(initialData.id, {
+					text: title,
+					done: done,
+					priority: priority,
+					dueDate: dueDate?.toISOString() || null,
+				})
+			} else {
+				// Create new todo
+				await addTodo({
+					text: title,
+					priority: priority,
+					dueDate: dueDate?.toISOString() || null,
+					done: false, // New todos are always not done initially usually
+				})
+			}
 
 			// Close the modal
-			onCancel();
+			onCancel()
 		} catch (error) {
-			console.error('Error updating todo:', error);
+			console.error('Error saving todo:', error)
 		}
-	};
+	}
 
 	const handleDateChange = (event: unknown, selectedDate?: Date) => {
-		setShowDatePicker(false);
+		setShowDatePicker(false)
 		if (selectedDate) {
-			setDueDate(selectedDate);
+			setDueDate(selectedDate)
 		}
-	};
+	}
 
 	return (
 		<View
@@ -75,11 +90,11 @@ export default function TodoForm({ initialData, onCancel, isEditing = true }: To
 				label='Title'
 				value={title}
 				onChangeText={(text) => {
-					setTitle(text);
+					setTitle(text)
 					if (formErrors.title) {
-						const newErrors = { ...formErrors };
-						delete newErrors.title;
-						setFormErrors(newErrors);
+						const newErrors = { ...formErrors }
+						delete newErrors.title
+						setFormErrors(newErrors)
 					}
 				}}
 				mode='outlined'
@@ -193,23 +208,19 @@ export default function TodoForm({ initialData, onCancel, isEditing = true }: To
 			)}
 
 			<View style={styles.buttonsContainer}>
-				<Button 
-					mode="outlined" 
-					onPress={onCancel} 
+				<Button
+					mode='outlined'
+					onPress={onCancel}
 					style={[styles.button, styles.cancelButton]}
 				>
 					Cancel
 				</Button>
-				<Button 
-					mode='contained' 
-					onPress={handleSubmit} 
-					style={styles.button}
-				>
+				<Button mode='contained' onPress={handleSubmit} style={styles.button}>
 					Update
 				</Button>
 			</View>
 		</View>
-	);
+	)
 }
 
 const styles = StyleSheet.create({

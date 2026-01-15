@@ -10,6 +10,7 @@ import {
 	Settings,
 } from 'lucide-react-native';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { useTheme } from '@/context/ThemeContext'
 
 interface CustomDrawerItemProps {
 	label: string;
@@ -23,41 +24,51 @@ const CustomDrawerItem: React.FC<CustomDrawerItemProps> = ({
 	active,
 }) => {
 	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-	const iconClr = active === route ? '#f1c40f' : '#111111';
+	const { themeClrs } = useTheme()
+
+	const isActive = active === route
+	const activeColor = themeClrs.colors.primary
+	const inactiveColor = themeClrs.colors.onSurfaceVariant
+	const iconClr = isActive ? activeColor : inactiveColor
 
 	const getIcon = (route: string, color: string, size: number) => {
 		switch (route) {
 			case 'Home':
-				return <ListTodo color={color} size={size} />;
+				return <ListTodo color={color} size={size} />
 			case 'ShoppingList':
-				return <ShoppingCart color={color} size={size} />;
+				return <ShoppingCart color={color} size={size} />
 			case 'Notes':
-				return <NotebookText color={color} size={size} />;
+				return <NotebookText color={color} size={size} />
 			case 'Settings':
-				return <Settings color={color} size={size} />;
+				return <Settings color={color} size={size} />
 			case 'Theme':
-				return <Icon name='palette' color={color} size={size} />;
+				return <Icon name='palette' color={color} size={size} />
 			case 'Widget':
-				return <Icon name='widgets' color={color} size={size} />;
+				return <Icon name='widgets' color={color} size={size} />
 			case 'Donate':
-				return <Icon name='heart-outline' color={color} size={size} />;
+				return <Icon name='heart-outline' color={color} size={size} />
 			case 'Profile':
-				return <Icon name='account' color={color} size={size} />;
+				return <Icon name='account' color={color} size={size} />
 			default:
-				return null;
+				return null
 		}
-	};
+	}
 
 	return (
 		<DrawerItem
 			icon={({ color, size }) => getIcon(route, iconClr, size)}
 			label={label}
-			labelStyle={{ color: active === route ? '#333' : '#888' }}
+			labelStyle={{
+				color: isActive ? activeColor : inactiveColor,
+				fontWeight: isActive ? 'bold' : 'normal',
+			}}
 			onPress={() => navigation.navigate(route as keyof RootStackParamList)}
-			activeTintColor={active === route ? 'yellow' : 'black'}
-			pressColor='transparent'
+			activeTintColor={themeClrs.colors.secondary} // Background highlight color
+			activeBackgroundColor={themeClrs.colors.secondary + '20'} // 20 hex = 12% opacity
+			focused={isActive}
+			style={{ borderRadius: 8 }}
 		/>
-	);
+	)
 };
 
 export default CustomDrawerItem;

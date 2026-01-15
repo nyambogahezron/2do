@@ -129,17 +129,17 @@ export default function SwipeableRow({ onSwipe, children }: ItemProps) {
 
 	return (
 		<Animated.View style={containerStyle}>
-			<View style={[styles.background, backgroundStyle]}>
+			<Animated.View style={[styles.background, backgroundStyle]}>
 				<Action
 					x={translateX}
 					deleteOpacity={deleteOpacity}
 					isPaused={isPaused}
 					cancelSwipe={cancelSwipe}
 				/>
-			</View>
+			</Animated.View>
 			<GestureDetector gesture={panGesture}>
 				<Animated.View style={animatedStyle}>{children}</Animated.View>
 			</GestureDetector>
 		</Animated.View>
-	);
+	)
 }

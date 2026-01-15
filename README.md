@@ -71,7 +71,6 @@ A full-stack React Native application built with Expo, featuring Firebase Authen
 ```
 2do/
 ├── app/                    # App screens and navigation
-│   ├── auth/              # Authentication screens (login, signup)
 │   ├── notes/             # Notes screens
 │   ├── shoppingList/      # Shopping list screens
 │   ├── todo/              # Todo screens
@@ -81,16 +80,16 @@ A full-stack React Native application built with Expo, featuring Firebase Authen
 │   ├── todos/            # Todo-related components
 │   └── ui/               # Generic UI components
 ├── context/              # React contexts
-│   ├── AuthContext.tsx   # Authentication state management
 │   └── ThemeContext.tsx  # Theme state management
+├── db/                   # Database configuration
+│   ├── schema.ts         # Drizzle ORM schema definitions
+│   └── connect.ts        # Database connection
+├── drizzle/             # Database migrations
+│   └── migrations.js     # Auto-generated migration files
 ├── lib/                  # Core libraries
-│   ├── auth.ts          # Firebase authentication helpers
-│   └── firebase.ts      # Firebase configuration
-├── services/            # Firebase service layer
-│   ├── todoService.ts   # Todo CRUD operations
-│   ├── noteService.ts   # Note CRUD operations
-│   └── shoppingService.ts # Shopping list CRUD operations
-├── store/               # State management
+│   ├── db.ts            # Database singleton and initialization
+│   └── utils.ts         # Utility functions
+├── store/               # State management with Drizzle ORM
 │   ├── todo.ts          # Todo store with hooks
 │   ├── notes.ts         # Notes store with hooks
 │   ├── shopping.ts      # Shopping store with hooks

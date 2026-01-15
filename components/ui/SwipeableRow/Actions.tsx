@@ -5,6 +5,7 @@ import Animated, {
 	useDerivedValue,
 	interpolate,
 	Extrapolation,
+	SharedValue,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -29,9 +30,9 @@ const styles = StyleSheet.create({
 });
 
 interface ActionProps {
-	x: Animated.SharedValue<number>;
-	deleteOpacity: Animated.SharedValue<number>;
-	isPaused: Animated.SharedValue<boolean>;
+	x: SharedValue<number>;
+	deleteOpacity: SharedValue<number>;
+	isPaused: SharedValue<boolean>;
 	cancelSwipe: () => void;
 }
 

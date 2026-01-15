@@ -130,7 +130,7 @@ export default function ShoppingList() {
 		}
 
 		try {
-			const listId = await createShoppingList(newListTitle);
+			const listId = await createShoppingList({ title: newListTitle });
 			setNewListTitle('');
 			setSelectedListId(listId);
 			refreshLists();
@@ -150,12 +150,13 @@ export default function ShoppingList() {
 		}
 
 		try {
-			await createShoppingItem(
-				selectedListId,
-				newItemName,
-				Number(newItemQuantity) || 1,
-				Number(newItemPrice) || 0
-			);
+			await createShoppingItem({
+				listId: selectedListId,
+				name: newItemName,
+				quantity: Number(newItemQuantity) || 1,
+				price: Number(newItemPrice) || 0,
+				checked: false,
+			});
 
 			setNewItemName('');
 			setNewItemQuantity('1');
